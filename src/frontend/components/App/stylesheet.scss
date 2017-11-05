@@ -1,0 +1,85 @@
+@import "~/common/stylesheet/index";
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  @include font-normal;
+  font-size: 16px;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+}
+
+a {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea,
+select,
+button {
+  @include font-normal;
+  font-size: inherit;
+}
+
+* {
+  transition: background-color .2s, box-shadow .2s;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .header {
+    align-self: stretch;
+    height: $height-header;
+    background-color: $theme-dark;
+    display: flex;
+    align-items: stretch;
+    padding: 0 1rem;
+
+    > * {
+      display: flex;
+      align-items: center;
+
+      &:hover {
+        background: $theme-normal;
+      }
+    }
+
+    .title {
+      padding: 0 1rem;
+      color: $theme-lighter;
+      font-size: 1.4rem;
+      background: url(/img/logo.png) no-repeat center;
+      background-size: 80%;
+
+      span {
+        visibility: hidden;
+      }
+    }
+
+    .space {
+      flex: 1;
+      align-self: center;
+    }
+
+    .sign_in {
+      padding: 0 1rem;
+      color: $theme-lighter;
+    }
+  }
+}

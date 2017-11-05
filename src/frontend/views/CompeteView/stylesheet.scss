@@ -1,0 +1,219 @@
+@import "~/common/stylesheet/index";
+
+.compete_view {
+  flex: 1;
+  width: 100vw;
+  display: flex;
+  align-items: stretch;
+
+  .status {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: $height-header;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: $theme-lighter;
+    pointer-events: none;
+
+    .big {
+      font-size: 2rem;
+    }
+  }
+
+  .problem_panel {
+    width: 40vw;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    background-color: $theme-light;
+    padding: 2rem;
+    box-sizing: border-box;
+    overflow-y: scroll;
+
+    .content {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: $theme-dark;
+    }
+
+    .sample {
+      position: relative;
+      border-radius: 2px;
+      padding: 1.4rem !important;
+    }
+  }
+
+  .player {
+    display: flex;
+    align-items: center;
+    height: $height-header;
+    color: $theme-light;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    background-color: $theme-normal;
+
+    &:hover {
+      position: relative;
+      z-index: 999;
+      box-shadow: 0 0 12px rgba(0, 0, 0, .6);
+    }
+
+    .picture {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 2rem;
+      background-size: cover;
+      margin-right: .4rem;
+    }
+
+    .name {
+      flex: 1;
+    }
+
+    .typing {
+      height: 1.6rem;
+    }
+
+    .rating {
+      display: flex;
+      align-items: center;
+
+      .symbol {
+        margin-top: .05rem;
+        margin-right: .2rem;
+      }
+
+      .number {
+        font-size: 1.2rem;
+      }
+    }
+
+    &.given_up {
+      background-color: $theme-red !important;
+      color: $theme-lighter;
+    }
+
+    &.submitted {
+      background-color: $theme-green !important;
+      color: $theme-lighter;
+    }
+  }
+
+  .status_panel {
+    width: 20vw;
+    display: flex;
+    flex-direction: column;
+    background-color: $theme-dark;
+
+    .versus {
+      height: $height-header;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $theme-lighter;
+      font-size: 1.2rem;
+    }
+  }
+
+  .ide_panel {
+    width: 40vw;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
+
+    &:hover {
+      box-shadow: 0 0 12px rgba(0, 0, 0, .6);
+    }
+
+    .player {
+      &:hover {
+        box-shadow: none;
+      }
+    }
+
+    .editor {
+      flex: 1;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .toolbar {
+      height: $height-header;
+      display: flex;
+
+      .button {
+        color: $theme-lighter;
+        align-self: stretch;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: $theme-dark;
+      }
+
+      .run {
+        flex: 1;
+        background-color: $theme-green;
+      }
+
+      .give_up {
+        width: 8rem;
+        background-color: $theme-red;
+      }
+
+      .submit {
+        flex: 1;
+        background-color: $theme-green;
+      }
+
+      .star {
+        flex: 1;
+        font-size: 1.5rem;
+
+        &.disabled span {
+          filter: grayscale(100);
+        }
+      }
+    }
+
+    .console {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      background-color: $theme-normal;
+
+      .testcase {
+        height: $height-header;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+
+        .number {
+          color: $theme-light;
+          font-size: 1.2rem;
+          flex: 1;
+        }
+
+        .pass {
+          color: green;
+
+          &:after {
+            content: 'pass';
+          }
+        }
+
+        .fail {
+          color: red;
+
+          &:after {
+            content: 'fail';
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="description">
+    <meta property="og:title">
+    <meta property="og:image" content="/img/og_image.png">
+    <meta property="og:description">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width">
+    <meta name="theme-color" content="#FF0000">
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+<div id="root" style="height: 100%"></div>
+</body>
+<script>
+  window.fbAsyncInit = function () {
+    FB.init({
+      appId: '142939243124118',
+      autoLogAppEvents: true,
+      xfbml: true,
+      version: 'v2.10'
+    });
+    FB.AppEvents.logPageView();
+  };
+
+  (function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) {
+      return;
+    }
+    js = d.createElement(s);
+    js.id = id;
+    js.src = "https://connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+</html>
