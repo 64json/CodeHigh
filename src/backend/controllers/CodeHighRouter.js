@@ -4,7 +4,7 @@ const create = (Model, singular, plural, paramReplacer = (req, res, next) => nex
   const router = express.Router();
 
   const allObjects = (req, res, next) => {
-    Model.find(req.options.where(Model))
+    Model.find(req.options.where(Model)).populate(req.options.populate)
       .then(objects => res.return({ [plural]: objects }))
       .catch(next);
   };

@@ -1,11 +1,11 @@
 {
-  "name": "Mat.Mami",
-  "short_name": "Mat.Mami",
+  "name": "CodeHigh",
+  "short_name": "CodeHigh",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#FF0000",
   "background_color": "#FF0000",
-  "description": "the official website of Mat.Mami",
+  "description": "the official website of CodeHigh",
   "icons": [
     {
       "src": "img/touch/homescreen48.png",

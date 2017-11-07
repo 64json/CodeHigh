@@ -48,6 +48,7 @@ const processSet = (schema, options) => {
   const modifyMatch = getMatch(merge(options.set, options.modify));
   schema.pre('save', function (next) {
     const doc = this;
+    if (doc.author === true) return next();
     if (options.authorsField) {
       if (doc.isModified('authors')) return next(new PermissionError());
       doc.authors.addToSet(doc.author);
@@ -111,6 +112,11 @@ const authorPlugin = (schema, options) => {
 
   schema.methods.setAuthor = function (author) {
     this.author = author;
+    return this;
+  };
+
+  schema.methods.force = function () {
+    this.author = true;
     return this;
   };
 

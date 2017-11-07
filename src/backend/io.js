@@ -1,5 +1,5 @@
 import socketIO from 'socket.io';
-import { Auth, Rating, Solution, Topic } from '/models';
+import { Auth, Solution, Topic } from '/models';
 import randomstring from 'randomstring';
 
 const io = socketIO();
@@ -35,8 +35,7 @@ io.on('connection', socket => {
         updated_at: null,
         finished_at: null,
         players: [],
-        topic_id: null,
-        topic_time: null,
+        topic: null,
       };
       games.push(game);
     }
@@ -48,11 +47,9 @@ io.on('connection', socket => {
         user,
         submitted_at: null,
         given_up_at: null,
-        code: null,
         typing: false,
-        solution_id: null,
-        ratings: [],
-        average_rating: null,
+        ratings: {},
+        solution: null,
       };
       game.players.push(player);
     }
@@ -67,8 +64,7 @@ io.on('connection', socket => {
           return Topic.findOne().skip(random)
         })
         .then(topic => {
-          game.topic_id = topic._id;
-          game.topic_time = topic.time;
+          game.topic = topic.toJSON({ req: {} });
           updateGame(game);
         })
         .catch(console.error);
@@ -84,14 +80,13 @@ io.on('connection', socket => {
     });
     socket.on('SUBMIT', code => {
       player.submitted_at = new Date();
-      player.code = code;
       new Solution({
-        topic: game.topic_id,
+        topic: game.topic,
         time: (player.submitted_at - game.started_at) / 1000,
         code,
       }).setAuthor(socketUser).save()
         .then(solution => {
-          player.solution_id = solution._id;
+          player.solution = solution.toJSON({ req: {} });
           updateGame(game);
         })
         .catch(console.error);
@@ -101,22 +96,14 @@ io.on('connection', socket => {
       updateGame(game);
     });
     socket.on('RATE', data => {
-      const { solution_id: solution, stars } = data;
-      const authors = [socketUser];
-      const query = { solution, authors };
-      const body = { solution, stars, authors };
-      Rating.findOneAndUpdate(query, body, { upsert: true })
-        .then(() => Rating.find({ solution }).populate('authors'))
-        .then(ratings => {
-          const ratedPlayer = game.players.find(player => player.solution_id && player.solution_id.equals(solution));
-          ratedPlayer.ratings = ratings.map(rating => {
-            const fb_user_id = rating.authors[0].fb_user_id;
-            const stars = rating.stars;
-            return { fb_user_id, stars };
-          });
-          const total_rating = ratedPlayer.ratings.reduce((sum, rating) => sum + rating.stars, 0);
-          ratedPlayer.average_rating = ratedPlayer.ratings.length ? total_rating / ratedPlayer.ratings.length : null;
-          game.players = game.players.sort((p1, p2) => (p2.average_rating || 0) - (p1.average_rating || 0));
+      const { solution_id, stars } = data;
+      Solution.get(solution_id)
+        .then(solution => solution.rate(stars, socketUser))
+        .then(solution => {
+          const ratedPlayer = game.players.find(player => solution._id.equals(player.solution._id));
+          ratedPlayer.average_stars = solution.average_stars;
+          ratedPlayer.ratings[player.user.fb_user_id] = stars;
+          game.players = game.players.sort((p1, p2) => (p2.average_stars || 0) - (p1.average_stars || 0));
           updateGame(game);
         })
         .catch(console.error);
@@ -135,7 +122,6 @@ io.on('connection', socket => {
         if (~index) games.splice(index, 1);
       }, 5 * 60 * 1000);
     }
-    console.log(game);
     io.to(game.room).emit('GAME_UPDATED', game);
   };
 });

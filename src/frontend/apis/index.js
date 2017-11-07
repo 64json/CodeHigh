@@ -50,6 +50,10 @@ const AuthApi = {
   destroyAuth: DELETE('/auth/'),
 };
 
+const RankingApi = {
+  allRankings: GET('/ranking/'),
+};
+
 const RatingApi = {
   allRatings: GET('/rating/'),
   addRating: POST('/rating/'),
@@ -92,6 +96,7 @@ const UserApi = {
 
 export {
   AuthApi,
+  RankingApi,
   RatingApi,
   SolutionApi,
   TestcaseApi,

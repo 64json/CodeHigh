@@ -15,5 +15,6 @@ db.once('open', () => {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(controllers);
 });
+app.io = io;
 
-export { app, io };
+export default app;

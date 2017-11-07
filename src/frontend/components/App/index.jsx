@@ -60,7 +60,7 @@ class App extends React.Component {
           }
         </header>
         <Switch>
-          <Route exact path="/" component={HomeView} />
+          <Route exact path="/" component={(routeProps) => <HomeView {...routeProps} signIn={() => this.signIn()} />} />
           <Route path="/compete" component={CompeteView} />
         </Switch>
       </div>

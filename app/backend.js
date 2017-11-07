@@ -39,10 +39,10 @@ if (__DEV__) {
         const keys = Object.keys(require.cache).filter(key => key.startsWith(backendBuiltPath));
         console.log(keys);
         keys.forEach(key => delete require.cache[key]);
-        const { app, io } = require(backendBuiltPath);
+        const app = require(backendBuiltPath).default;
         backendApp.use(app);
         httpServer = backendApp.listen(devProxyPort);
-        socketServer = io.listen(socketPort);
+        socketServer = app.io.listen(socketPort);
       } catch (e) {
         console.error(e);
       }
@@ -54,5 +54,7 @@ if (__DEV__) {
     pathRewrite: { ['^' + endpoint]: '' }
   });
 } else {
-  module.exports = require(backendBuiltPath).default;
+  const app = require(backendBuiltPath).default;
+  app.io.listen(socketPort);
+  module.exports = app;
 }

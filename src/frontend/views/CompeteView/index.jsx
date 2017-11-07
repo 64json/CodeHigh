@@ -10,7 +10,6 @@ import styles from './stylesheet.scss';
 import { classes, nn } from '/common/util';
 import Cookies from 'js-cookie/src/js.cookie';
 import Highlight from 'react-highlight';
-import { TopicApi } from '/apis';
 import { TestcaseApi } from '/apis/index';
 import 'highlight.js/styles/monokai.css';
 import chai from 'chai';
@@ -37,7 +36,7 @@ class CompeteView extends React.Component {
       results: null,
       last_typed_time: null,
       code: null,
-      stars: null,
+      temp_stars: null,
       selected_fb_user_id: null,
       removed: false,
     };
@@ -53,26 +52,22 @@ class CompeteView extends React.Component {
       const token = Cookies.get('token');
       socket.emit('AUTH', { token });
       socket.on('GAME_UPDATED', game => {
-        console.log(game);
         const {
           started_at,
           updated_at,
           finished_at,
           players,
-          topic_id,
+          topic,
         } = game;
         const last_time = new Date();
         const time_elapsed = new Date(updated_at) - new Date(started_at);
         this.setState({ players, finished_at, time_elapsed, last_time });
 
-        if (this.state.topic === null && topic_id !== null) {
-          TopicApi.getTopic(topic_id)
-            .then(({ topic }) => {
-              this.setState({ topic });
-              TestcaseApi.allTestcases({ topic: topic._id })
-                .then(({ testcases }) => {
-                  this.setState({ testcases });
-                });
+        if (this.state.topic === null && topic !== null) {
+          this.setState({ topic });
+          TestcaseApi.allTestcases({ topic: topic._id })
+            .then(({ testcases }) => {
+              this.setState({ testcases });
             });
         }
       });
@@ -137,12 +132,12 @@ class CompeteView extends React.Component {
     this.setState({ selected_fb_user_id: player.user.fb_user_id });
   }
 
-  mouseOverRating(stars) {
-    this.setState({ stars });
+  mouseOverRating(temp_stars) {
+    this.setState({ temp_stars });
   }
 
   mouseOutRating() {
-    this.setState({ stars: null });
+    this.setState({ temp_stars: null });
   }
 
   findPlayer(fb_user_id, players = this.state.players) {
@@ -152,7 +147,7 @@ class CompeteView extends React.Component {
   rate(stars) {
     const { selected_fb_user_id } = this.state;
     const player = this.findPlayer(selected_fb_user_id);
-    const solution_id = player.solution_id;
+    const solution_id = player.solution._id;
     socket.emit('RATE', { solution_id, stars });
   }
 
@@ -176,10 +171,9 @@ class CompeteView extends React.Component {
       user: author,
       submitted_at: null,
       given_up_at: null,
-      code: null,
       typing: false,
-      solution_id: null,
-      ratings: [],
+      ratings: {},
+      solution: null,
     };
     const player = this.findPlayer(selected_fb_user_id) || me;
 
@@ -235,10 +229,10 @@ class CompeteView extends React.Component {
                     <img src="/img/typing.svg" className={styles.typing} />
                   }
                   {
-                    player.ratings.length > 0 &&
+                    Object.keys(player.ratings).length > 0 &&
                     <div className={styles.rating}>
                       <span className={styles.symbol}>⭐</span>
-                      <span className={styles.number}>️{player.average_rating.toFixed(1)}</span>
+                      <span className={styles.number}>️{player.average_stars.toFixed(1)}</span>
                     </div>
                   }
                 </div>
@@ -261,7 +255,7 @@ class CompeteView extends React.Component {
           </div>
           <AceEditor
             className={styles.editor}
-            value={(done ? player.code : code) || ''}
+            value={(done ? player.solution && player.solution.code : code) || ''}
             onChange={value => this.onChange(value)}
             mode="javascript"
             theme="monokai"
@@ -303,12 +297,13 @@ class CompeteView extends React.Component {
             </div>
           }
           {
-            done && player.solution_id &&
+            done && player.solution &&
             <div className={styles.toolbar}>
               {
                 [1, 2, 3, 4, 5].map(stars => {
-                  const rating = player.ratings.find(rating => rating.fb_user_id === author.fb_user_id);
-                  const disabled = this.state.stars ? stars > this.state.stars : rating ? stars > rating.stars : true;
+                  const orig_stars = player.ratings[author.fb_user_id];
+                  const { temp_stars } = this.state;
+                  const disabled = temp_stars ? stars > temp_stars : orig_stars ? stars > orig_stars : true;
                   return (
                     <a href='#' key={stars}
                        className={classes(styles.button, styles.star, disabled && styles.disabled)}

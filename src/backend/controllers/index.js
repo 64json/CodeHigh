@@ -3,7 +3,7 @@ import { Auth, Rating, Solution, Testcase, Topic, User } from '/models';
 import { isMongooseObject, replaceMe } from '/common/util';
 import { AuthorizationError, NotFoundError, PermissionError } from '/common/error';
 import Router from './CodeHighRouter';
-import auth from './auth'
+import auth from './auth';
 
 const router = new express.Router();
 
@@ -30,13 +30,26 @@ const processWhere = (Model, where) => {
   return $and.length ? { $and } : {};
 };
 
+const processPopulate = populate => {
+  const fields = populate ? populate.split(',') : [];
+  return fields.map(field => {
+    const query = {};
+    let cursor = query;
+    const tokens = field.split('.');
+    for (const token of tokens) {
+      cursor = cursor.populate = { path: token };
+    }
+    return query.populate;
+  });
+};
+
 const getRequestOptions = (req) => {
   const {
-    populate = '',
+    populate,
     ...where,
   } = req.query;
   return {
-    populate: populate.split(','),
+    populate: processPopulate(populate),
     where: Object => processWhere(Object, where)
   };
 };
@@ -47,27 +60,17 @@ router.use((req, res, next) => {
   res.return = obj => {
     const flat = {};
     const keys = Object.keys(obj);
-    const promises = keys.map(key => new Promise((resolve, reject) => {
+    for (const key of keys) {
       const value = obj[key];
       if (isMongooseObject(value)) {
-        const Object = value.constructor;
-        resolve(Object.populate(value, req.options.populate)
-          .then(newValue => {
-            flat[key] = newValue.toJSON({ req });
-          }));
+        flat[key] = value.toJSON({ req });
       } else if (Array.isArray(value) && isMongooseObject(value[0])) {
-        const Object = value[0].constructor;
-        resolve(Object.populate(value, req.options.populate)
-          .then(newValue => {
-            flat[key] = newValue.map(elem => elem.toJSON({ req }));
-          }));
+        flat[key] = value.map(elem => elem.toJSON({ req }));
       } else {
         flat[key] = value;
-        resolve();
       }
-    }));
-    return Promise.all(promises)
-      .then(() => res.json(flat));
+    }
+    res.json(flat);
   };
 
   const { token } = req.cookies;
@@ -90,7 +93,6 @@ router.use((req, res, next) => {
   }
 });
 router.use('/auth', auth);
-router.use('/rating', Router(Rating, 'rating', 'ratings'));
 router.use('/solution', Router(Solution, 'solution', 'solutions'));
 router.use('/testcase', Router(Testcase, 'testcase', 'testcases'));
 router.use('/topic', Router(Topic, 'topic', 'topics'));
@@ -111,5 +113,18 @@ router.use((err, req, res, next) => {
   });
   console.error(err);
 });
+
+Solution.find().populate('authors')
+  .then(solutions => {
+    for (const solution of solutions) {
+      Rating.find({ solution })
+        .then(([rating]) => {
+          if (!rating || !rating.stars) return;
+          solution.rate(rating.stars, rating.authors[0])
+        })
+        .catch(console.error);
+    }
+  })
+  .catch(console.error);
 
 export default router;
