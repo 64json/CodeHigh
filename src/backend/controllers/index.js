@@ -114,17 +114,4 @@ router.use((err, req, res, next) => {
   console.error(err);
 });
 
-Solution.find().populate('authors')
-  .then(solutions => {
-    for (const solution of solutions) {
-      Rating.find({ solution })
-        .then(([rating]) => {
-          if (!rating || !rating.stars) return;
-          solution.rate(rating.stars, rating.authors[0])
-        })
-        .catch(console.error);
-    }
-  })
-  .catch(console.error);
-
 export default router;

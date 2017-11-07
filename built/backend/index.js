@@ -486,20 +486,7 @@ router.use(function (err, req, res, next) {
     err: err });
 
   console.error(err);
-});
-
-_models.Solution.find().populate('authors').
-then(function (solutions) {var _iteratorNormalCompletion4 = true;var _didIteratorError4 = false;var _iteratorError4 = undefined;try {var _loop = function _loop() {var
-      solution = _step4.value;
-      _models.Rating.find({ solution: solution }).
-      then(function (_ref3) {var _ref4 = _slicedToArray(_ref3, 1),rating = _ref4[0];
-        if (!rating || !rating.stars) return;
-        solution.rate(rating.stars, rating.authors[0]);
-      }).
-      catch(console.error);};for (var _iterator4 = solutions[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {_loop();
-    }} catch (err) {_didIteratorError4 = true;_iteratorError4 = err;} finally {try {if (!_iteratorNormalCompletion4 && _iterator4.return) {_iterator4.return();}} finally {if (_didIteratorError4) {throw _iteratorError4;}}}
-}).
-catch(console.error);exports.default =
+});exports.default =
 
 router;
 
