@@ -9,19 +9,20 @@ const modelName = 'Rating';
 const ratingSchema = new Schema({
   solution: { type: ObjectId, ref: 'Solution', required: true },
   stars: { type: Number, required: true, min: 1, max: 5, validate: Number.isInteger },
+  author: { type: ObjectId, ref: 'User' },
 });
-ratingSchema.index({ solution: 1, authors: 1 });
+ratingSchema.index({ solution: 1, author: 1 });
 
 ratingSchema.plugin(authorPlugin, {
-  authorsField: true,
+  authorField: true,
   set: {
-    owner: true,
+    none: true,
   },
   get: {
     guest: true,
   },
   remove: {
-    owner: true,
+    none: true,
   }
 });
 

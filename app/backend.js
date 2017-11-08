@@ -37,7 +37,6 @@ if (__DEV__) {
         if (socketServer) socketServer.close();
         const backendApp = express();
         const keys = Object.keys(require.cache).filter(key => key.startsWith(backendBuiltPath));
-        console.log(keys);
         keys.forEach(key => delete require.cache[key]);
         const app = require(backendBuiltPath).default;
         backendApp.use(app);

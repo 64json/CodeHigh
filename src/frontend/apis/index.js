@@ -50,10 +50,6 @@ const AuthApi = {
   destroyAuth: DELETE('/auth/'),
 };
 
-const RankingApi = {
-  allRankings: GET('/ranking/'),
-};
-
 const RatingApi = {
   allRatings: GET('/rating/'),
   addRating: POST('/rating/'),
@@ -68,14 +64,7 @@ const SolutionApi = {
   getSolution: GET('/solution/:solution_id'),
   updateSolution: PUT('/solution/:solution_id'),
   deleteSolution: DELETE('/solution/:solution_id'),
-};
-
-const TestcaseApi = {
-  allTestcases: GET('/testcase/'),
-  addTestcase: POST('/testcase/'),
-  getTestcase: GET('/testcase/:testcase_id'),
-  updateTestcase: PUT('/testcase/:testcase_id'),
-  deleteTestcase: DELETE('/testcase/:testcase_id'),
+  rateSolution: POST('/solution/:solution_id/rate'),
 };
 
 const TopicApi = {
@@ -96,10 +85,8 @@ const UserApi = {
 
 export {
   AuthApi,
-  RankingApi,
   RatingApi,
   SolutionApi,
-  TestcaseApi,
   TopicApi,
   UserApi,
 };

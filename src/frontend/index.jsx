@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import { routerReducer } from 'react-router-redux';
 import App from '/components/App';
 import * as reducers from '/reducers';
+import FacebookProvider from 'react-facebook';
 
 const MOUNT_NODE = document.getElementById('root');
 
@@ -14,9 +15,11 @@ const store = createStore(combineReducers({ ...reducers, routing: routerReducer 
 const render = (Component) => {
   ReactDOM.render(
     <Provider store={store}>
-      <BrowserRouter>
-        <Component />
-      </BrowserRouter>
+      <FacebookProvider appId="142939243124118">
+        <BrowserRouter>
+          <Component />
+        </BrowserRouter>
+      </FacebookProvider>
     </Provider>,
     MOUNT_NODE
   );

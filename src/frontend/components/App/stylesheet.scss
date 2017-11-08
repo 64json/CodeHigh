@@ -20,7 +20,6 @@ body {
 }
 
 a {
-  display: block;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
@@ -39,9 +38,14 @@ button {
 }
 
 .app {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+
+  &.home {
+    height: auto;
+    min-height: 100vh;
+  }
 
   .header {
     align-self: stretch;

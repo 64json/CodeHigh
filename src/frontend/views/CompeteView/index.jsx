@@ -10,9 +10,9 @@ import styles from './stylesheet.scss';
 import { classes, nn } from '/common/util';
 import Cookies from 'js-cookie/src/js.cookie';
 import Highlight from 'react-highlight';
-import { TestcaseApi } from '/apis/index';
 import 'highlight.js/styles/monokai.css';
 import chai from 'chai';
+import { Rating } from '/components';
 
 let socket = null;
 
@@ -27,18 +27,19 @@ class CompeteView extends React.Component {
     super(props);
 
     this.state = {
-      players: [],
-      finished_at: null,
-      time_elapsed: null,
       last_time: null,
-      topic: null,
-      testcases: null,
-      results: null,
+      time_elapsed: null,
       last_typed_time: null,
+      errors: null,
       code: null,
-      temp_stars: null,
       selected_fb_user_id: null,
-      removed: false,
+      game: {
+        started_at: null,
+        updated_at: null,
+        finished_at: null,
+        players: [],
+        topic: null,
+      },
     };
   }
 
@@ -55,27 +56,16 @@ class CompeteView extends React.Component {
         const {
           started_at,
           updated_at,
-          finished_at,
-          players,
-          topic,
         } = game;
         const last_time = new Date();
         const time_elapsed = new Date(updated_at) - new Date(started_at);
-        this.setState({ players, finished_at, time_elapsed, last_time });
-
-        if (this.state.topic === null && topic !== null) {
-          this.setState({ topic });
-          TestcaseApi.allTestcases({ topic: topic._id })
-            .then(({ testcases }) => {
-              this.setState({ testcases });
-            });
-        }
+        this.setState({ last_time, time_elapsed, game });
       });
-      socket.on('GAME_REMOVED', () => this.setState({ removed: true }));
+      socket.on('GAME_REMOVED', () => this.setState({ game: null }));
     }
 
     this.intervalId = setInterval(() => {
-      const { time_elapsed, last_time, topic, last_typed_time } = this.state;
+      const { last_time, time_elapsed, last_typed_time } = this.state;
       const me = this.findPlayer(author.fb_user_id);
       const now = new Date();
       if (me) {
@@ -86,7 +76,7 @@ class CompeteView extends React.Component {
           socket.emit('STOP_TYPING');
         }
       }
-      if (topic) {
+      if (last_time) {
         this.setState(state => ({
           time_elapsed: time_elapsed + (now - last_time),
           last_time: now,
@@ -102,22 +92,21 @@ class CompeteView extends React.Component {
   }
 
   onChange(value) {
-    this.setState({ last_typed_time: new Date(), code: value });
+    this.setState({ last_typed_time: new Date(), code: value, errors: null });
   }
 
   run() {
-    const { code, testcases } = this.state;
+    const { code, game } = this.state;
+    if (code === null || code === '') return;
     const { expect } = chai;
-    const results = testcases.map(testcase => {
+    const errors = game.topic.testcases.map(testcase => {
       try {
         eval(code + ';' + testcase.eval);
       } catch (err) {
-        console.error(err);
-        return false;
+        return err;
       }
-      return true;
     });
-    this.setState({ results });
+    this.setState({ errors });
   }
 
   submit() {
@@ -132,16 +121,8 @@ class CompeteView extends React.Component {
     this.setState({ selected_fb_user_id: player.user.fb_user_id });
   }
 
-  mouseOverRating(temp_stars) {
-    this.setState({ temp_stars });
-  }
-
-  mouseOutRating() {
-    this.setState({ temp_stars: null });
-  }
-
-  findPlayer(fb_user_id, players = this.state.players) {
-    return players && players.find(player => player.user.fb_user_id === fb_user_id);
+  findPlayer(fb_user_id, players = this.state.game.players) {
+    return players.find(player => player.user.fb_user_id === fb_user_id);
   }
 
   rate(stars) {
@@ -154,18 +135,19 @@ class CompeteView extends React.Component {
   render() {
     const { author } = this.props.env;
     const {
-      players,
-      finished_at,
       time_elapsed,
-      topic,
-      testcases,
-      results,
+      errors,
       code,
       selected_fb_user_id,
-      removed,
+      game,
     } = this.state;
+    const {
+      players,
+      finished_at,
+      topic,
+    } = game;
 
-    if (!author || removed) return <Redirect to='/' />;
+    if (!author || !game) return <Redirect to='/' />;
 
     const me = this.findPlayer(author.fb_user_id) || {
       user: author,
@@ -185,7 +167,7 @@ class CompeteView extends React.Component {
       status = <span className={styles.big}>{nn(time_remaining / 60 | 0) + ':' + nn(time_remaining % 60 | 0)}</span>;
     }
     const done = finished_at || me.submitted_at || me.given_up_at;
-    const success = results && results.every(result => result);
+    const success = errors && errors.every(error => error === undefined);
     const editable = topic && !done;
     return (
       <div className={styles.compete_view}>
@@ -193,14 +175,17 @@ class CompeteView extends React.Component {
           {status}
         </div>
         {
-          topic && testcases ?
+          topic ?
             <div className={styles.problem_panel}>
+              <div className={styles.title}>
+                {topic.title}
+              </div>
               <div className={styles.content}>
                 {topic.content}
               </div>
               {
-                testcases.filter(testcase => testcase.public).map(testcase => (
-                  <Highlight className={classes(styles.sample, 'javascript')} key={testcase._id}>
+                topic.testcases.filter(testcase => testcase.public).map((testcase, i) => (
+                  <Highlight className={classes(styles.sample, 'javascript')} key={i}>
                     {testcase.eval}
                   </Highlight>
                 ))
@@ -273,15 +258,16 @@ class CompeteView extends React.Component {
             </div>
           }
           {
-            !done && results &&
+            !done && errors &&
             <div className={styles.console}>
               {
-                testcases.map((testcase, i) => (
-                  <div className={styles.testcase} key={testcase._id}>
+                errors.map((error, i) => (
+                  <div className={styles.testcase} key={i}>
                     <span className={styles.number}>Testcase #{i + 1}</span>
                     {
-                      results &&
-                      <span className={results[i] ? styles.pass : styles.fail}></span>
+                      error === undefined ?
+                        <span className={styles.pass}>pass</span> :
+                        <span className={styles.fail}>{error.toString()}</span>
                     }
                   </div>
                 ))
@@ -298,23 +284,8 @@ class CompeteView extends React.Component {
           }
           {
             done && player.solution &&
-            <div className={styles.toolbar}>
-              {
-                [1, 2, 3, 4, 5].map(stars => {
-                  const orig_stars = player.ratings[author.fb_user_id];
-                  const { temp_stars } = this.state;
-                  const disabled = temp_stars ? stars > temp_stars : orig_stars ? stars > orig_stars : true;
-                  return (
-                    <a href='#' key={stars}
-                       className={classes(styles.button, styles.star, disabled && styles.disabled)}
-                       onMouseEnter={() => this.mouseOverRating(stars)} onMouseLeave={() => this.mouseOutRating()}
-                       onClick={() => this.rate(stars)}>
-                      <span>⭐️</span>
-                    </a>
-                  )
-                })
-              }
-            </div>
+            <Rating stars={player.ratings[author.fb_user_id]}
+                    rate={stars => this.rate(stars)} />
           }
         </div>
       </div>

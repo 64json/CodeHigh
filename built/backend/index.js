@@ -70,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "/api";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
+/******/ 	return __webpack_require__(__webpack_require__.s = 11);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -99,7 +99,7 @@ db;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });var _authorPlugin = __webpack_require__(19);Object.defineProperty(exports, 'authorPlugin', { enumerable: true, get: function get() {return _interopRequireDefault(_authorPlugin).default;} });var _codeHighPlugin = __webpack_require__(20);Object.defineProperty(exports, 'codeHighPlugin', { enumerable: true, get: function get() {return _interopRequireDefault(_codeHighPlugin).
+Object.defineProperty(exports, "__esModule", { value: true });var _authorPlugin = __webpack_require__(20);Object.defineProperty(exports, 'authorPlugin', { enumerable: true, get: function get() {return _interopRequireDefault(_authorPlugin).default;} });var _codeHighPlugin = __webpack_require__(21);Object.defineProperty(exports, 'codeHighPlugin', { enumerable: true, get: function get() {return _interopRequireDefault(_codeHighPlugin).
     default;} });function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 /***/ }),
@@ -136,19 +136,18 @@ module.exports = require("express");
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });var _Auth = __webpack_require__(15);Object.defineProperty(exports, 'Auth', { enumerable: true, get: function get() {return _interopRequireDefault(_Auth).default;} });var _Rating = __webpack_require__(8);Object.defineProperty(exports, 'Rating', { enumerable: true, get: function get() {return _interopRequireDefault(_Rating).
-    default;} });var _Solution = __webpack_require__(22);Object.defineProperty(exports, 'Solution', { enumerable: true, get: function get() {return _interopRequireDefault(_Solution).
-    default;} });var _Testcase = __webpack_require__(23);Object.defineProperty(exports, 'Testcase', { enumerable: true, get: function get() {return _interopRequireDefault(_Testcase).
+Object.defineProperty(exports, "__esModule", { value: true });var _Auth = __webpack_require__(16);Object.defineProperty(exports, 'Auth', { enumerable: true, get: function get() {return _interopRequireDefault(_Auth).default;} });var _Rating = __webpack_require__(8);Object.defineProperty(exports, 'Rating', { enumerable: true, get: function get() {return _interopRequireDefault(_Rating).
+    default;} });var _Solution = __webpack_require__(23);Object.defineProperty(exports, 'Solution', { enumerable: true, get: function get() {return _interopRequireDefault(_Solution).
     default;} });var _Topic = __webpack_require__(9);Object.defineProperty(exports, 'Topic', { enumerable: true, get: function get() {return _interopRequireDefault(_Topic).
-    default;} });var _User = __webpack_require__(24);Object.defineProperty(exports, 'User', { enumerable: true, get: function get() {return _interopRequireDefault(_User).
+    default;} });var _User = __webpack_require__(26);Object.defineProperty(exports, 'User', { enumerable: true, get: function get() {return _interopRequireDefault(_User).
     default;} });function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 /***/ }),
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(__dirname) {const path = __webpack_require__(17);
-const fs = __webpack_require__(18);
+/* WEBPACK VAR INJECTION */(function(__dirname) {const path = __webpack_require__(18);
+const fs = __webpack_require__(19);
 
 const {
   NODE_ENV = 'production',
@@ -269,20 +268,21 @@ ObjectId = Schema.Types.ObjectId;
 var modelName = 'Rating';
 var ratingSchema = new Schema({
   solution: { type: ObjectId, ref: 'Solution', required: true },
-  stars: { type: Number, required: true, min: 1, max: 5, validate: Number.isInteger } });
+  stars: { type: Number, required: true, min: 1, max: 5, validate: Number.isInteger },
+  author: { type: ObjectId, ref: 'User' } });
 
-ratingSchema.index({ solution: 1, authors: 1 });
+ratingSchema.index({ solution: 1, author: 1 });
 
 ratingSchema.plugin(_plugins.authorPlugin, {
-  authorsField: true,
+  authorField: true,
   set: {
-    owner: true },
+    none: true },
 
   get: {
     guest: true },
 
   remove: {
-    owner: true } });
+    none: true } });
 
 
 
@@ -296,27 +296,38 @@ Rating;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _mongoose = __webpack_require__(0);var _mongoose2 = _interopRequireDefault(_mongoose);
 var _db = __webpack_require__(1);var _db2 = _interopRequireDefault(_db);
-var _plugins = __webpack_require__(2);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
+var _plugins = __webpack_require__(2);
+var _nested = __webpack_require__(24);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
 
 Schema = _mongoose2.default.Schema;var
 ObjectId = Schema.Types.ObjectId;
 
 var modelName = 'Topic';
 var topicSchema = new Schema({
+  title: { type: String, required: true },
   content: { type: String, required: true },
   time: { type: Number, required: true, min: 1, validate: Number.isInteger },
-  top_solutions: [{ type: ObjectId, ref: 'Solution', required: true }] });
+  testcases: { type: [_nested.Testcase], default: [] },
+  top_solutions: [{ type: ObjectId, ref: 'Solution', required: true }],
+  author: { type: ObjectId, ref: 'User' } });
 
 
 topicSchema.plugin(_plugins.authorPlugin, {
+  authorField: true,
   set: {
-    none: true },
+    none: ['top_solutions'] },
+
+  insert: {
+    user: true },
+
+  modify: {
+    owner: true },
 
   get: {
     guest: true },
 
   remove: {
-    none: true } });
+    owner: true } });
 
 
 
@@ -328,13 +339,76 @@ Topic;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });var _express = __webpack_require__(4);var _express2 = _interopRequireDefault(_express);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+var create = function create(Model, singular, plural) {var paramReplacer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function (req, res, next) {return next();};
+  var router = _express2.default.Router();
+
+  var allObjects = function allObjects(req, res, next) {
+    Model.find(req.options.where(Model)).populate(req.options.populate).
+    then(function (objects) {return res.return(_defineProperty({}, plural, objects));}).
+    catch(next);
+  };
+
+  var getObject = function getObject(req, res, next) {var
+    object_id = req.params.object_id;
+    Model.get(object_id).
+    then(function (object) {return res.return(_defineProperty({}, singular, object));}).
+    catch(next);
+  };
+
+  var addObject = function addObject(req, res, next) {var
+    body = req.body;
+    Model.create(body).
+    then(function (object) {return object.setAuthor(req.author).save();}).
+    then(function (object) {return res.return(_defineProperty({}, singular, object));}).
+    catch(next);
+  };
+
+  var updateObject = function updateObject(req, res, next) {var
+    object_id = req.params.object_id;var
+    body = req.body;
+    Model.get(object_id).
+    then(function (object) {return object.setAuthor(req.author).set(body).save();}).
+    then(function (object) {return res.return(_defineProperty({}, singular, object));}).
+    catch(next);
+  };
+
+  var deleteObject = function deleteObject(req, res, next) {var
+    object_id = req.params.object_id;
+    Model.get(object_id).
+    then(function (object) {return object.setAuthor(req.author).remove();}).
+    then(function (object) {return res.return(_defineProperty({}, singular, object));}).
+    catch(next);
+  };
+
+  router.route('/').
+  get(allObjects).
+  post(addObject);
+
+  router.route('/:object_id').
+  all(paramReplacer).
+  get(getObject).
+  put(updateObject).
+  delete(deleteObject);
+
+  return router;
+};exports.default =
+
+create;
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _express = __webpack_require__(4);var _express2 = _interopRequireDefault(_express);
-var _morgan = __webpack_require__(11);var _morgan2 = _interopRequireDefault(_morgan);
-var _cookieParser = __webpack_require__(12);var _cookieParser2 = _interopRequireDefault(_cookieParser);
-var _bodyParser = __webpack_require__(13);var _bodyParser2 = _interopRequireDefault(_bodyParser);
-var _controllers = __webpack_require__(14);var _controllers2 = _interopRequireDefault(_controllers);
+var _morgan = __webpack_require__(12);var _morgan2 = _interopRequireDefault(_morgan);
+var _cookieParser = __webpack_require__(13);var _cookieParser2 = _interopRequireDefault(_cookieParser);
+var _bodyParser = __webpack_require__(14);var _bodyParser2 = _interopRequireDefault(_bodyParser);
+var _controllers = __webpack_require__(15);var _controllers2 = _interopRequireDefault(_controllers);
 var _db = __webpack_require__(1);var _db2 = _interopRequireDefault(_db);
-var _io = __webpack_require__(28);var _io2 = _interopRequireDefault(_io);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _io = __webpack_require__(30);var _io2 = _interopRequireDefault(_io);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 var app = (0, _express2.default)();
 _db2.default.on('error', console.error);
@@ -350,25 +424,25 @@ app.io = _io2.default;exports.default =
 app;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports) {
 
 module.exports = require("morgan");
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports) {
 
 module.exports = require("cookie-parser");
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports) {
 
 module.exports = require("body-parser");
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -376,8 +450,9 @@ Object.defineProperty(exports, "__esModule", { value: true });var _slicedToArray
 var _models = __webpack_require__(5);
 var _util = __webpack_require__(7);
 var _error = __webpack_require__(3);
-var _CodeHighRouter = __webpack_require__(25);var _CodeHighRouter2 = _interopRequireDefault(_CodeHighRouter);
-var _auth = __webpack_require__(26);var _auth2 = _interopRequireDefault(_auth);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _objectWithoutProperties(obj, keys) {var target = {};for (var i in obj) {if (keys.indexOf(i) >= 0) continue;if (!Object.prototype.hasOwnProperty.call(obj, i)) continue;target[i] = obj[i];}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+var _CodeHighRouter = __webpack_require__(10);var _CodeHighRouter2 = _interopRequireDefault(_CodeHighRouter);
+var _auth = __webpack_require__(27);var _auth2 = _interopRequireDefault(_auth);
+var _solution = __webpack_require__(29);var _solution2 = _interopRequireDefault(_solution);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _objectWithoutProperties(obj, keys) {var target = {};for (var i in obj) {if (keys.indexOf(i) >= 0) continue;if (!Object.prototype.hasOwnProperty.call(obj, i)) continue;target[i] = obj[i];}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
 
 var router = new _express2.default.Router();
 
@@ -467,8 +542,8 @@ router.use(function (req, res, next) {
   }
 });
 router.use('/auth', _auth2.default);
-router.use('/solution', (0, _CodeHighRouter2.default)(_models.Solution, 'solution', 'solutions'));
-router.use('/testcase', (0, _CodeHighRouter2.default)(_models.Testcase, 'testcase', 'testcases'));
+router.use('/rating', (0, _CodeHighRouter2.default)(_models.Rating, 'rating', 'ratings'));
+router.use('/solution', _solution2.default);
 router.use('/topic', (0, _CodeHighRouter2.default)(_models.Topic, 'topic', 'topics'));
 router.use('/user', (0, _CodeHighRouter2.default)(_models.User, 'user', 'users', _util.replaceMe));
 router.use(function (req, res, next) {return next(new _error.NotFoundError());});
@@ -491,15 +566,15 @@ router.use(function (err, req, res, next) {
 router;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _mongoose = __webpack_require__(0);var _mongoose2 = _interopRequireDefault(_mongoose);
-var _jsonwebtoken = __webpack_require__(16);var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
+var _jsonwebtoken = __webpack_require__(17);var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
 var _db = __webpack_require__(1);var _db2 = _interopRequireDefault(_db);
 var _environment = __webpack_require__(6);
-var _config = __webpack_require__(21);
+var _config = __webpack_require__(22);
 var _error = __webpack_require__(3);
 var _util = __webpack_require__(7);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
 
@@ -563,25 +638,25 @@ var Auth = _db2.default.model('Auth', authSchema);exports.default =
 Auth;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports) {
 
 module.exports = require("jsonwebtoken");
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports) {
 
 module.exports = require("path");
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -635,10 +710,10 @@ var processSet = function processSet(schema, options) {
   var modifyMatch = getMatch(merge(options.set, options.modify));
   schema.pre('save', function (next) {
     var doc = this;
-    if (doc.author === true) return next();
-    if (options.authorsField) {
-      if (doc.isModified('authors')) return next(new _error.PermissionError());
-      doc.authors.addToSet(doc.author);
+    if (doc._author === true) return next();
+    if (options.authorField) {
+      if (doc.isModified('author')) return next(new _error.PermissionError());
+      doc.author = doc._author;
     }
     try {
       check(doc.isNew ? insertMatch : modifyMatch, doc.author, doc, function (field) {
@@ -682,7 +757,7 @@ var processRemove = function processRemove(schema, options) {
 
 var authorPlugin = function authorPlugin(schema, options) {
   options = _extends({
-    authorsField: false,
+    authorField: false,
     set: {},
     insert: {},
     modify: {},
@@ -691,19 +766,13 @@ var authorPlugin = function authorPlugin(schema, options) {
   options);
 
 
-  if (options.authorsField) {
-    schema.add({
-      authors: [{ type: ObjectId, ref: 'User' }] });
-
-  }
-
   schema.methods.setAuthor = function (author) {
-    this.author = author;
+    this._author = author;
     return this;
   };
 
   schema.methods.force = function () {
-    this.author = true;
+    this._author = true;
     return this;
   };
 
@@ -715,7 +784,7 @@ var authorPlugin = function authorPlugin(schema, options) {
 authorPlugin;
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -751,7 +820,7 @@ var codeHighPlugin = function codeHighPlugin(schema, options) {
 codeHighPlugin;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -763,7 +832,7 @@ Object.defineProperty(exports, "__esModule", { value: true });var jwtSignOptions
 jwtSignOptions = jwtSignOptions;
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -781,11 +850,12 @@ var solutionSchema = new Schema({
   topic: { type: ObjectId, ref: 'Topic', required: true },
   time: { type: Number, required: true },
   code: { type: String, required: true },
-  average_stars: { type: Number } });
+  average_stars: { type: Number },
+  author: { type: ObjectId, ref: 'User' } });
 
 
 solutionSchema.plugin(_plugins.authorPlugin, {
-  authorsField: true,
+  authorField: true,
   insert: {
     user: true },
 
@@ -803,9 +873,8 @@ solutionSchema.plugin(_plugins.authorPlugin, {
 solutionSchema.methods.rate = function (stars, author) {
   var solution = this;var
   topic = solution.topic;
-  var authors = [author];
-  var query = { solution: solution, authors: authors };
-  var body = { solution: solution, stars: stars, authors: authors };
+  var query = { solution: solution, author: author };
+  var body = { solution: solution, stars: stars, author: author };
   return _Rating2.default.findOneAndUpdate(query, body, { upsert: true }).
   then(function () {return _Rating2.default.aggregate([{
       $match: { solution: new _mongoose2.default.Types.ObjectId(solution._id) } },
@@ -825,41 +894,37 @@ var Solution = _db2.default.model(modelName, solutionSchema);exports.default =
 Solution;
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });var _mongoose = __webpack_require__(0);var _mongoose2 = _interopRequireDefault(_mongoose);
-var _db = __webpack_require__(1);var _db2 = _interopRequireDefault(_db);
-var _plugins = __webpack_require__(2);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
+Object.defineProperty(exports, "__esModule", { value: true });var _Testcase = __webpack_require__(25);Object.defineProperty(exports, 'Testcase', { enumerable: true, get: function get() {return _interopRequireDefault(_Testcase).default;} });function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
-Schema = _mongoose2.default.Schema;var
-ObjectId = Schema.Types.ObjectId;
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
 
-var modelName = 'Testcase';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });var _mongoose = __webpack_require__(0);var _mongoose2 = _interopRequireDefault(_mongoose);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
+
+Schema = _mongoose2.default.Schema;
+
 var testcaseSchema = new Schema({
-  topic: { type: ObjectId, ref: 'Topic', required: true },
   eval: { type: String, required: true },
   public: { type: Boolean, required: true } });
 
 
-testcaseSchema.plugin(_plugins.authorPlugin, {
-  set: {
-    none: true },
-
-  get: {
-    guest: true },
-
-  remove: {
-    none: true } });
+testcaseSchema.options.toJSON = {
+  transform: function transform(doc, ret, options) {
+    delete ret._id;
+    return ret;
+  } };exports.default =
 
 
-
-var Testcase = _db2.default.model(modelName, testcaseSchema);exports.default =
-Testcase;
+testcaseSchema;
 
 /***/ }),
-/* 24 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -897,7 +962,7 @@ userSchema.methods.isUser = function () {
 };
 
 userSchema.methods.isOwner = function (doc) {
-  return this._id.equals(doc.authors[0]);
+  return this._id.equals(doc.author._id);
 };
 
 userSchema.methods.isSelf = function (doc) {
@@ -908,75 +973,12 @@ var User = _db2.default.model(modelName, userSchema);exports.default =
 User;
 
 /***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });var _express = __webpack_require__(4);var _express2 = _interopRequireDefault(_express);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
-
-var create = function create(Model, singular, plural) {var paramReplacer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function (req, res, next) {return next();};
-  var router = _express2.default.Router();
-
-  var allObjects = function allObjects(req, res, next) {
-    Model.find(req.options.where(Model)).populate(req.options.populate).
-    then(function (objects) {return res.return(_defineProperty({}, plural, objects));}).
-    catch(next);
-  };
-
-  var getObject = function getObject(req, res, next) {var
-    object_id = req.params.object_id;
-    Model.get(object_id).
-    then(function (object) {return res.return(_defineProperty({}, singular, object));}).
-    catch(next);
-  };
-
-  var addObject = function addObject(req, res, next) {var
-    body = req.body;
-    Model.create(body).
-    then(function (object) {return object.setAuthor(req.author).save();}).
-    then(function (object) {return res.return(_defineProperty({}, singular, object));}).
-    catch(next);
-  };
-
-  var updateObject = function updateObject(req, res, next) {var
-    object_id = req.params.object_id;var
-    body = req.body;
-    Model.get(object_id).
-    then(function (object) {return object.setAuthor(req.author).set(body).save();}).
-    then(function (object) {return res.return(_defineProperty({}, singular, object));}).
-    catch(next);
-  };
-
-  var deleteObject = function deleteObject(req, res, next) {var
-    object_id = req.params.object_id;
-    Model.get(object_id).
-    then(function (object) {return object.setAuthor(req.author).remove();}).
-    then(function (object) {return res.return(_defineProperty({}, singular, object));}).
-    catch(next);
-  };
-
-  router.route('/').
-  get(allObjects).
-  post(addObject);
-
-  router.route('/:object_id').
-  all(paramReplacer).
-  get(getObject).
-  put(updateObject).
-  delete(deleteObject);
-
-  return router;
-};exports.default =
-
-create;
-
-/***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _express = __webpack_require__(4);var _express2 = _interopRequireDefault(_express);
-var _fb = __webpack_require__(27);var _fb2 = _interopRequireDefault(_fb);
+var _fb = __webpack_require__(28);var _fb2 = _interopRequireDefault(_fb);
 var _models = __webpack_require__(5);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 var router = _express2.default.Router();
@@ -1030,19 +1032,43 @@ delete(destroyAuth);exports.default =
 router;
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports) {
 
 module.exports = require("fb");
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });var _socket = __webpack_require__(29);var _socket2 = _interopRequireDefault(_socket);
+Object.defineProperty(exports, "__esModule", { value: true });var _CodeHighRouter = __webpack_require__(10);var _CodeHighRouter2 = _interopRequireDefault(_CodeHighRouter);
+var _models = __webpack_require__(5);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+var router = (0, _CodeHighRouter2.default)(_models.Solution, 'solution', 'solutions');
+
+var rateSolution = function rateSolution(req, res, next) {var
+  solution_id = req.params.solution_id;var
+  stars = req.body.stars;
+  _models.Solution.get(solution_id).
+  then(function (solution) {return solution.rate(stars, req.author);}).
+  then(function (solution) {return res.return({ solution: solution });}).
+  catch(next);
+};
+
+router.route('/:solution_id/rate').
+post(rateSolution);exports.default =
+
+router;
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });var _socket = __webpack_require__(31);var _socket2 = _interopRequireDefault(_socket);
 var _models = __webpack_require__(5);
-var _randomstring = __webpack_require__(30);var _randomstring2 = _interopRequireDefault(_randomstring);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _randomstring = __webpack_require__(32);var _randomstring2 = _interopRequireDefault(_randomstring);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 var io = (0, _socket2.default)();
 var games = [];
@@ -1108,9 +1134,22 @@ io.on('connection', function (socket) {
       then(function (topic) {
         game.topic = topic.toJSON({ req: {} });
         updateGame(game);
+        setTimeout(function () {
+          updateGame(game);
+        }, game.topic.time * 1000);
       }).
       catch(console.error);
     }
+
+    socket.on('disconnect', function () {
+      if (!game.started_at) {
+        var index = game.players.indexOf(player);
+        if (~index) {
+          game.players.splice(index, 1);
+          updateGame(game);
+        }
+      }
+    });
 
     socket.on('START_TYPING', function () {
       player.typing = true;
@@ -1142,7 +1181,7 @@ io.on('connection', function (socket) {
       _models.Solution.get(solution_id).
       then(function (solution) {return solution.rate(stars, socketUser);}).
       then(function (solution) {
-        var ratedPlayer = game.players.find(function (player) {return solution._id.equals(player.solution._id);});
+        var ratedPlayer = game.players.find(function (player) {return solution._id.equals(player.solution && player.solution._id);});
         ratedPlayer.average_stars = solution.average_stars;
         ratedPlayer.ratings[player.user.fb_user_id] = stars;
         game.players = game.players.sort(function (p1, p2) {return (p2.average_stars || 0) - (p1.average_stars || 0);});
@@ -1155,14 +1194,14 @@ io.on('connection', function (socket) {
   var updateGame = function updateGame(game) {
     game.updated_at = new Date();
     var all_submitted = game.players.every(function (player) {return player.submitted_at || player.given_up_at;});
-    var time_done = game.topic_id && (game.updated_at - game.started_at) / 1000 > game.topic_time;
+    var time_done = game.topic && (game.updated_at - game.started_at) / 1000 > game.topic.time;
     if (!game.finished_at && (all_submitted || time_done)) {
       game.finished_at = game.updated_at;
       setTimeout(function () {
         io.to(game.room).emit('GAME_REMOVED');
         var index = games.indexOf(game);
         if (~index) games.splice(index, 1);
-      }, 5 * 60 * 1000);
+      }, game.topic ? game.topic.time * game.players.length * 1000 : 0);
     }
     io.to(game.room).emit('GAME_UPDATED', game);
   };
@@ -1171,13 +1210,13 @@ io.on('connection', function (socket) {
 io;
 
 /***/ }),
-/* 29 */
+/* 31 */
 /***/ (function(module, exports) {
 
 module.exports = require("socket.io");
 
 /***/ }),
-/* 30 */
+/* 32 */
 /***/ (function(module, exports) {
 
 module.exports = require("randomstring");

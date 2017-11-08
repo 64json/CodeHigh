@@ -3,10 +3,11 @@ import { connect } from 'react-redux';
 import { actions as envActions } from '/reducers/env';
 import { Link, Route, Switch, withRouter } from 'react-router-dom';
 import Cookies from 'js-cookie/src/js.cookie';
-import { CompeteView, HomeView } from '/views';
-import './stylesheet.scss';
+import { Login } from 'react-facebook';
+import { CompeteView, HomeView, TopicView } from '/views';
 import { AuthApi, UserApi } from '/apis';
 import styles from './stylesheet.scss';
+import { classes } from '/common/util';
 
 @withRouter
 @connect(
@@ -24,15 +25,11 @@ class App extends React.Component {
     }
   }
 
-  signIn() {
-    FB.login(response => {
-      if (response.authResponse) {
-        const fb_access_token = response.authResponse.accessToken;
-        AuthApi.createAuth({ fb_access_token })
-          .then(() => UserApi.getUser('me'))
-          .then(res => this.props.setAuthor(res.user));
-      }
-    });
+  signIn(data) {
+    const fb_access_token = data.tokenDetail.accessToken;
+    AuthApi.createAuth({ fb_access_token })
+      .then(() => UserApi.getUser('me'))
+      .then(res => this.props.setAuthor(res.user));
   }
 
   signOut() {
@@ -42,8 +39,9 @@ class App extends React.Component {
 
   render() {
     const { author } = this.props.env;
+    const home = this.props.location.pathname === '/';
     return (
-      <div className={styles.app}>
+      <div className={classes(styles.app, home && styles.home)}>
         <header className={styles.header}>
           <Link to='/' className={styles.title}>
             <span>CodeHigh</span>
@@ -54,14 +52,16 @@ class App extends React.Component {
               <a href='#' className={styles.sign_in} onClick={() => this.signOut()}>
                 Sign Out
               </a> :
-              <a href='#' className={styles.sign_in} onClick={() => this.signIn()}>
-                Sign In
-              </a>
+              <Login
+                onResponse={data => this.signIn(data)}>
+                <a href='#' className={styles.sign_in}>Sign In</a>
+              </Login>
           }
         </header>
         <Switch>
           <Route exact path="/" component={(routeProps) => <HomeView {...routeProps} signIn={() => this.signIn()} />} />
           <Route path="/compete" component={CompeteView} />
+          <Route path="/topic/:topic_id" component={TopicView} />
         </Switch>
       </div>
     );

@@ -66,9 +66,22 @@ io.on('connection', socket => {
         .then(topic => {
           game.topic = topic.toJSON({ req: {} });
           updateGame(game);
+          setTimeout(() => {
+            updateGame(game);
+          }, game.topic.time * 1000);
         })
         .catch(console.error);
     }
+
+    socket.on('disconnect', () => {
+      if (!game.started_at) {
+        const index = game.players.indexOf(player);
+        if (~index) {
+          game.players.splice(index, 1);
+          updateGame(game);
+        }
+      }
+    });
 
     socket.on('START_TYPING', () => {
       player.typing = true;
@@ -100,7 +113,7 @@ io.on('connection', socket => {
       Solution.get(solution_id)
         .then(solution => solution.rate(stars, socketUser))
         .then(solution => {
-          const ratedPlayer = game.players.find(player => solution._id.equals(player.solution._id));
+          const ratedPlayer = game.players.find(player => solution._id.equals(player.solution && player.solution._id));
           ratedPlayer.average_stars = solution.average_stars;
           ratedPlayer.ratings[player.user.fb_user_id] = stars;
           game.players = game.players.sort((p1, p2) => (p2.average_stars || 0) - (p1.average_stars || 0));
@@ -113,14 +126,14 @@ io.on('connection', socket => {
   const updateGame = game => {
     game.updated_at = new Date();
     const all_submitted = game.players.every(player => player.submitted_at || player.given_up_at);
-    const time_done = game.topic_id && (game.updated_at - game.started_at) / 1000 > game.topic_time;
+    const time_done = game.topic && (game.updated_at - game.started_at) / 1000 > game.topic.time;
     if (!game.finished_at && (all_submitted || time_done)) {
       game.finished_at = game.updated_at;
       setTimeout(() => {
         io.to(game.room).emit('GAME_REMOVED');
         const index = games.indexOf(game);
         if (~index) games.splice(index, 1);
-      }, 5 * 60 * 1000);
+      }, game.topic ? game.topic.time * game.players.length * 1000 : 0);
     }
     io.to(game.room).emit('GAME_UPDATED', game);
   };

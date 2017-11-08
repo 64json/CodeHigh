@@ -4,13 +4,12 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   background-color: $theme-light;
 
   .cover {
     background: url(/img/hey_boi.jpg) center;
     background-size: cover;
-    align-self: stretch;
     min-height: 50vw;
     display: flex;
     flex-direction: column;
@@ -26,27 +25,31 @@
       margin-bottom: 2rem;
     }
 
-    .join {
-      border: 4px solid $theme-normal;
-      color: $theme-normal;
-      padding: 1rem 2rem;
-      font-weight: bold;
-      font-size: 1.2rem;
+    .button_container {
+      display: flex;
 
-      &:hover {
-        background-color: $theme-normal;
-        color: $theme-lighter;
+      .button {
+        border: 4px solid $theme-normal;
+        color: $theme-normal;
+        padding: 1rem 2rem;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-right: 1rem;
+
+        &:hover {
+          background-color: $theme-normal;
+          color: $theme-lighter;
+        }
       }
     }
   }
 
-  .ranking {
+  .topics {
     display: flex;
-    justify-content: center;
     padding: 4rem;
     flex-wrap: wrap;
 
-    .title {
+    .section {
       flex-basis: 100%;
       display: flex;
       justify-content: center;
@@ -58,81 +61,111 @@
       flex-basis: 50%;
       padding: 4rem;
       box-sizing: border-box;
-      background-color: $theme-light;
-
-      .content {
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
-        color: $theme-dark;
-      }
-    }
-  }
-
-  .row {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-
-    .player {
       display: flex;
-      align-items: center;
-      height: $height-header;
-      color: $theme-light;
-      padding: 0 1rem;
-      box-sizing: border-box;
-      background-color: $theme-normal;
+      flex-direction: column;
 
-      &:hover {
-        position: relative;
-        z-index: 999;
-        box-shadow: 0 0 12px rgba(0, 0, 0, .6);
+      .title_row {
+        background-color: $theme-dark;
+        padding: 0 1.5rem;
+
+        .player {
+          display: flex;
+          align-items: center;
+          height: $height-header;
+          color: $theme-light;
+          box-sizing: border-box;
+
+          .title {
+            flex: 1;
+            color: $theme-lighter;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+
+            &.owned {
+              text-decoration: underline;
+            }
+          }
+
+          .picture {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 2rem;
+            background-size: cover;
+            margin-right: .4rem;
+          }
+        }
+
+        .content {
+          background-color: $theme-dark;
+          padding-bottom: 1.5rem;
+          color: $theme-light;
+        }
       }
 
-      .picture {
-        width: 2rem;
-        height: 2rem;
-        border-radius: 2rem;
-        background-size: cover;
-        margin-right: .4rem;
-      }
-
-      .name {
-        flex: 1;
-      }
-
-      .typing {
-        height: 1.6rem;
-      }
-
-      .rating {
+      .row {
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        align-items: stretch;
 
-        .symbol {
-          margin-top: .05rem;
-          margin-right: .2rem;
+        .player {
+          display: flex;
+          align-items: center;
+          height: $height-header;
+          color: $theme-light;
+          padding: 0 1rem;
+          box-sizing: border-box;
+          background-color: $theme-normal;
+
+          &:hover {
+            position: relative;
+            z-index: 999;
+            box-shadow: 0 0 12px rgba(0, 0, 0, .6);
+          }
+
+          .picture {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 2rem;
+            background-size: cover;
+            margin-right: .4rem;
+          }
+
+          .name {
+            flex: 1;
+          }
+
+          .rating {
+            display: flex;
+            align-items: center;
+
+            .symbol {
+              margin-top: .05rem;
+              margin-right: .2rem;
+            }
+
+            .number {
+              font-size: 1.2rem;
+            }
+          }
         }
 
-        .number {
-          font-size: 1.2rem;
+        .editor {
+          flex: 1;
+          width: 100% !important;
+          height: 200px !important;
+          transition: none;
+
+          * {
+            transition: none;
+          }
+        }
+
+        .comment {
+          background-color: $theme-dark;
+          display: flex;
+          justify-content: center;
         }
       }
-
-      &.given_up {
-        background-color: $theme-red !important;
-        color: $theme-lighter;
-      }
-
-      &.submitted {
-        background-color: $theme-green !important;
-        color: $theme-lighter;
-      }
-    }
-
-    .editor {
-      flex: 1;
-      width: 100% !important;
-      height: 200px !important;
     }
   }
 

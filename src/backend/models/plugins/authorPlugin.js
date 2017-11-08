@@ -48,10 +48,10 @@ const processSet = (schema, options) => {
   const modifyMatch = getMatch(merge(options.set, options.modify));
   schema.pre('save', function (next) {
     const doc = this;
-    if (doc.author === true) return next();
-    if (options.authorsField) {
-      if (doc.isModified('authors')) return next(new PermissionError());
-      doc.authors.addToSet(doc.author);
+    if (doc._author === true) return next();
+    if (options.authorField) {
+      if (doc.isModified('author')) return next(new PermissionError());
+      doc.author = doc._author;
     }
     try {
       check(doc.isNew ? insertMatch : modifyMatch, doc.author, doc, field => {
@@ -95,7 +95,7 @@ const processRemove = (schema, options) => {
 
 const authorPlugin = (schema, options) => {
   options = {
-    authorsField: false,
+    authorField: false,
     set: {},
     insert: {},
     modify: {},
@@ -104,19 +104,13 @@ const authorPlugin = (schema, options) => {
     ...options,
   };
 
-  if (options.authorsField) {
-    schema.add({
-      authors: [{ type: ObjectId, ref: 'User' }],
-    });
-  }
-
   schema.methods.setAuthor = function (author) {
-    this.author = author;
+    this._author = author;
     return this;
   };
 
   schema.methods.force = function () {
-    this.author = true;
+    this._author = true;
     return this;
   };
 

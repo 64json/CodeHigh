@@ -13,10 +13,11 @@ const solutionSchema = new Schema({
   time: { type: Number, required: true },
   code: { type: String, required: true },
   average_stars: { type: Number },
+  author: { type: ObjectId, ref: 'User' },
 });
 
 solutionSchema.plugin(authorPlugin, {
-  authorsField: true,
+  authorField: true,
   insert: {
     user: true,
   },
@@ -34,9 +35,8 @@ solutionSchema.plugin(authorPlugin, {
 solutionSchema.methods.rate = function (stars, author) {
   const solution = this;
   const { topic } = solution;
-  const authors = [author];
-  const query = { solution, authors };
-  const body = { solution, stars, authors };
+  const query = { solution, author };
+  const body = { solution, stars, author };
   return Rating.findOneAndUpdate(query, body, { upsert: true })
     .then(() => Rating.aggregate([{
       $match: { solution: new mongoose.Types.ObjectId(solution._id) }

@@ -32,7 +32,7 @@ userSchema.methods.isUser = function () {
 };
 
 userSchema.methods.isOwner = function (doc) {
-  return this._id.equals(doc.authors[0]);
+  return this._id.equals(doc.author._id);
 };
 
 userSchema.methods.isSelf = function (doc) {

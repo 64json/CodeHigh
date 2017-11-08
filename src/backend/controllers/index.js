@@ -1,9 +1,10 @@
 import express from 'express';
-import { Auth, Rating, Solution, Testcase, Topic, User } from '/models';
+import { Auth, Rating, Topic, User } from '/models';
 import { isMongooseObject, replaceMe } from '/common/util';
 import { AuthorizationError, NotFoundError, PermissionError } from '/common/error';
 import Router from './CodeHighRouter';
 import auth from './auth';
+import solution from './solution';
 
 const router = new express.Router();
 
@@ -93,8 +94,8 @@ router.use((req, res, next) => {
   }
 });
 router.use('/auth', auth);
-router.use('/solution', Router(Solution, 'solution', 'solutions'));
-router.use('/testcase', Router(Testcase, 'testcase', 'testcases'));
+router.use('/rating', Router(Rating, 'rating', 'ratings'));
+router.use('/solution', solution);
 router.use('/topic', Router(Topic, 'topic', 'topics'));
 router.use('/user', Router(User, 'user', 'users', replaceMe));
 router.use((req, res, next) => next(new NotFoundError()));
