@@ -213,18 +213,10 @@
 
         .pass {
           color: green;
-
-          &:after {
-            content: 'pass';
-          }
         }
 
         .fail {
           color: red;
-
-          &:after {
-            content: 'fail';
-          }
         }
       }
     }

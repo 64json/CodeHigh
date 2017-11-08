@@ -76,7 +76,6 @@
           box-sizing: border-box;
 
           .title {
-            flex: 1;
             color: $theme-lighter;
             font-size: 1.2rem;
             margin-right: 1rem;
@@ -84,6 +83,10 @@
             &.owned {
               text-decoration: underline;
             }
+          }
+
+          .space {
+            flex: 1;
           }
 
           .picture {

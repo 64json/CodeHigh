@@ -3,9 +3,9 @@ import styles from './stylesheet.scss';
 import { Link, Redirect, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { TopicApi } from '/apis';
+import { Comments, Login } from 'react-facebook';
 import { classes } from '/common/util';
 import AceEditor from 'react-ace';
-import { Comments } from 'react-facebook';
 import 'brace';
 import 'brace/mode/javascript';
 import 'brace/theme/monokai';
@@ -92,9 +92,12 @@ class HomeView extends React.Component {
                 </Link>
               </div> :
               <div className={styles.button_container}>
-                <a href='#' onClick={this.props.signIn} className={styles.button}>
-                  SIGN IN
-                </a>
+                <Login
+                  onResponse={this.props.signIn}>
+                  <a href='#' className={styles.button}>
+                    SIGN IN
+                  </a>
+                </Login>
               </div>
           }
         </div>
@@ -109,7 +112,7 @@ class HomeView extends React.Component {
                   <div className={styles.title_row}>
                     <div className={styles.player}>
                       {
-                        topic.author._id === author._id ?
+                        author && author._id === topic.author._id ?
                           <Link to={`/topic/${topic._id}`} className={classes(styles.title, styles.owned)}>
                             {topic.title}
                           </Link> :
@@ -117,6 +120,7 @@ class HomeView extends React.Component {
                             {topic.title}
                           </div>
                       }
+                      <div className={styles.space} />
                       <div className={styles.picture}
                            style={{ backgroundImage: `url(http://graph.facebook.com/${topic.author.fb_user_id}/picture?type=square)` }} />
                       <div className={styles.name}>

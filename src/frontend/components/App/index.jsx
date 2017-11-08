@@ -54,12 +54,15 @@ class App extends React.Component {
               </a> :
               <Login
                 onResponse={data => this.signIn(data)}>
-                <a href='#' className={styles.sign_in}>Sign In</a>
+                <a href='#' className={styles.sign_in}>
+                  Sign In
+                </a>
               </Login>
           }
         </header>
         <Switch>
-          <Route exact path="/" component={(routeProps) => <HomeView {...routeProps} signIn={() => this.signIn()} />} />
+          <Route exact path="/"
+                 component={(routeProps) => <HomeView {...routeProps} signIn={data => this.signIn(data)} />} />
           <Route path="/compete" component={CompeteView} />
           <Route path="/topic/:topic_id" component={TopicView} />
         </Switch>
