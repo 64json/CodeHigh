@@ -167,7 +167,7 @@ class HomeView extends React.Component {
                           }
                           {
                             solution._id === opened &&
-                            <Comments href={`http://localhost:8080/${topic._id}/${solution._id}`}
+                            <Comments href={`http://codehigh.net/${topic._id}/${solution._id}`}
                                       colorScheme='dark'
                                       className={styles.comment} />
                           }
