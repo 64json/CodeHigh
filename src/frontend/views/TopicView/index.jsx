@@ -132,12 +132,7 @@ class TopicView extends React.Component {
       TopicApi.addTopic(topic) :
       TopicApi.updateTopic(topic_id, topic);
     promise
-      .then(({ topic }) => {
-        topic.testcases.forEach(testcase => {
-          testcase._tid = randomstring.generate();
-        });
-        this.setState({ topic_id: topic._id, topic })
-      })
+      .then(() => this.setState({ topic_id: null }))
       .catch(console.error);
   }
 
