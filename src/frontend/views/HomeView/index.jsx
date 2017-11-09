@@ -65,6 +65,13 @@ class HomeView extends React.Component {
   }
 
   rate(topic, solution, stars) {
+    const { author } = this.props.env;
+    const rating = {
+      solution: solution._id,
+      stars,
+      author: author._id,
+    };
+    this.setState({ rating });
     SolutionApi.rateSolution(solution._id, { stars })
       .then(() => SolutionApi.allSolutions({
         topic: topic._id,
