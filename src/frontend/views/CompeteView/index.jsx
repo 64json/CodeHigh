@@ -27,13 +27,14 @@ class CompeteView extends React.Component {
     super(props);
 
     this.state = {
-      last_time: null,
+      last_tick_at: null,
       time_elapsed: null,
-      last_typed_time: null,
+      last_typed_at: null,
       errors: null,
       code: null,
       selected_fb_user_id: null,
       game: {
+        countdown_at: null,
         started_at: null,
         updated_at: null,
         finished_at: null,
@@ -54,32 +55,40 @@ class CompeteView extends React.Component {
       socket.emit('AUTH', { token });
       socket.on('GAME_UPDATED', game => {
         const {
+          countdown_at,
           started_at,
           updated_at,
         } = game;
-        const last_time = new Date();
-        const time_elapsed = new Date(updated_at) - new Date(started_at);
-        this.setState({ last_time, time_elapsed, game });
+        const last_tick_at = new Date();
+        const time_elapsed = new Date(updated_at) - new Date(started_at || countdown_at);
+        this.setState({ last_tick_at, time_elapsed, game });
+      });
+      socket.on('PLAYER_UPDATED', updated_player => {
+        const players = [...this.state.game.players];
+        const index = players.findIndex(player => player.user.fb_user_id === updated_player.user.fb_user_id);
+        players[index] = updated_player;
+        const game = { ...this.state.game, players };
+        this.setState({ game });
       });
       socket.on('GAME_REMOVED', () => this.setState({ game: null }));
     }
 
     this.intervalId = setInterval(() => {
-      const { last_time, time_elapsed, last_typed_time } = this.state;
+      const { last_tick_at, time_elapsed, last_typed_at } = this.state;
       const me = this.findPlayer(author.fb_user_id);
       const now = new Date();
       if (me) {
-        if (!me.typing && (now - last_typed_time) < 300) {
+        if (!me.typing && (now - last_typed_at) < 300) {
           socket.emit('START_TYPING');
         }
-        if (me.typing && (now - last_typed_time) >= 300) {
+        if (me.typing && (now - last_typed_at) >= 300) {
           socket.emit('STOP_TYPING');
         }
       }
-      if (last_time) {
+      if (last_tick_at) {
         this.setState(state => ({
-          time_elapsed: time_elapsed + (now - last_time),
-          last_time: now,
+          time_elapsed: time_elapsed + (now - last_tick_at),
+          last_tick_at: now,
         }));
       }
     }, 300);
@@ -92,7 +101,7 @@ class CompeteView extends React.Component {
   }
 
   onChange(value) {
-    this.setState({ last_typed_time: new Date(), code: value, errors: null });
+    this.setState({ last_typed_at: new Date(), code: value, errors: null });
   }
 
   run() {
@@ -142,8 +151,10 @@ class CompeteView extends React.Component {
       game,
     } = this.state;
     const {
-      players,
+      countdown_at,
+      started_at,
       finished_at,
+      players,
       topic,
     } = game;
 
@@ -162,9 +173,12 @@ class CompeteView extends React.Component {
     let status = <span>Waiting for players</span>;
     if (finished_at) {
       status = <span>Please vote</span>;
-    } else if (topic) {
+    } else if (started_at) {
       const time_remaining = Math.max(topic.time - time_elapsed / 1000, 0);
       status = <span className={styles.big}>{nn(time_remaining / 60 | 0) + ':' + nn(time_remaining % 60 | 0)}</span>;
+    } else if (countdown_at) {
+      const time_remaining = (10 - time_elapsed / 1000) | 0;
+      status = <span>Starting in {time_remaining} seconds</span>
     }
     const done = finished_at || me.submitted_at || me.given_up_at;
     const success = errors && errors.every(error => error === undefined);

@@ -99,7 +99,6 @@
         }
 
         .content {
-          background-color: $theme-dark;
           padding-bottom: 1.5rem;
           color: $theme-light;
         }
@@ -109,6 +108,23 @@
         display: flex;
         flex-direction: column;
         align-items: stretch;
+        background-color: $theme-normal;
+
+        &.opened {
+          background-color: $theme-dark;
+
+          &:hover {
+            position: relative;
+            z-index: 999;
+            box-shadow: 0 0 12px rgba(0, 0, 0, .6);
+          }
+
+          .player {
+            &:hover {
+              box-shadow: none;
+            }
+          }
+        }
 
         .player {
           display: flex;
@@ -117,7 +133,6 @@
           color: $theme-light;
           padding: 0 1rem;
           box-sizing: border-box;
-          background-color: $theme-normal;
 
           &:hover {
             position: relative;
@@ -164,9 +179,24 @@
         }
 
         .comment {
-          background-color: $theme-dark;
           display: flex;
           justify-content: center;
+        }
+      }
+
+      .load_more {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: $theme-dark;
+        height: $height-header;
+        color: $theme-light;
+        box-sizing: border-box;
+
+        &:hover {
+          position: relative;
+          z-index: 999;
+          box-shadow: 0 0 12px rgba(0, 0, 0, .6);
         }
       }
     }

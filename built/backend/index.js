@@ -86,7 +86,7 @@ module.exports = require("mongoose");
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _mongoose = __webpack_require__(0);var _mongoose2 = _interopRequireDefault(_mongoose);
 var _environment = __webpack_require__(6);
-var _plugins = __webpack_require__(2);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _plugins = __webpack_require__(3);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 _mongoose2.default.Promise = global.Promise;
 _mongoose2.default.plugin(_plugins.codeHighPlugin);
@@ -96,14 +96,6 @@ db;
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });var _authorPlugin = __webpack_require__(20);Object.defineProperty(exports, 'authorPlugin', { enumerable: true, get: function get() {return _interopRequireDefault(_authorPlugin).default;} });var _codeHighPlugin = __webpack_require__(21);Object.defineProperty(exports, 'codeHighPlugin', { enumerable: true, get: function get() {return _interopRequireDefault(_codeHighPlugin).
-    default;} });function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
-
-/***/ }),
-/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -124,6 +116,14 @@ CodeHighError = CodeHighError;exports.
 NotFoundError = NotFoundError;exports.
 PermissionError = PermissionError;exports.
 AuthorizationError = AuthorizationError;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });var _authorPlugin = __webpack_require__(20);Object.defineProperty(exports, 'authorPlugin', { enumerable: true, get: function get() {return _interopRequireDefault(_authorPlugin).default;} });var _codeHighPlugin = __webpack_require__(21);Object.defineProperty(exports, 'codeHighPlugin', { enumerable: true, get: function get() {return _interopRequireDefault(_codeHighPlugin).
+    default;} });function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 /***/ }),
 /* 4 */
@@ -231,7 +231,7 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.now = exports.isMongooseObject = exports.replaceMe = undefined;var _error = __webpack_require__(3);
+Object.defineProperty(exports, "__esModule", { value: true });exports.now = exports.isMongooseObject = exports.replaceMe = undefined;var _error = __webpack_require__(2);
 
 var replaceMe = function replaceMe(req, res, next) {
   if (req.params.object_id === 'me') {var
@@ -260,7 +260,7 @@ now = now;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _mongoose = __webpack_require__(0);var _mongoose2 = _interopRequireDefault(_mongoose);
 var _db = __webpack_require__(1);var _db2 = _interopRequireDefault(_db);
-var _plugins = __webpack_require__(2);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
+var _plugins = __webpack_require__(3);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
 
 Schema = _mongoose2.default.Schema;var
 ObjectId = Schema.Types.ObjectId;
@@ -296,7 +296,7 @@ Rating;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _mongoose = __webpack_require__(0);var _mongoose2 = _interopRequireDefault(_mongoose);
 var _db = __webpack_require__(1);var _db2 = _interopRequireDefault(_db);
-var _plugins = __webpack_require__(2);
+var _plugins = __webpack_require__(3);
 var _nested = __webpack_require__(24);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
 
 Schema = _mongoose2.default.Schema;var
@@ -339,21 +339,26 @@ Topic;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });var _express = __webpack_require__(4);var _express2 = _interopRequireDefault(_express);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+Object.defineProperty(exports, "__esModule", { value: true });var _express = __webpack_require__(4);var _express2 = _interopRequireDefault(_express);
+var _error = __webpack_require__(2);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
 
 var create = function create(Model, singular, plural) {var paramReplacer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function (req, res, next) {return next();};
   var router = _express2.default.Router();
 
-  var allObjects = function allObjects(req, res, next) {
-    Model.find(req.options.where(Model)).populate(req.options.populate).
+  var allObjects = function allObjects(req, res, next) {var _req$options =
+    req.options,where = _req$options.where,sort = _req$options.sort,skip = _req$options.skip,limit = _req$options.limit,populate = _req$options.populate;
+    Model.find(where(Model)).sort(sort).skip(skip).limit(limit).populate(populate).
     then(function (objects) {return res.return(_defineProperty({}, plural, objects));}).
     catch(next);
   };
 
   var getObject = function getObject(req, res, next) {var
     object_id = req.params.object_id;
-    Model.get(object_id).
-    then(function (object) {return res.return(_defineProperty({}, singular, object));}).
+    Model.findById(object_id).populate(req.options.populate).
+    then(function (object) {
+      if (!object) throw new _error.NotFoundError();
+      return res.return(_defineProperty({}, singular, object));
+    }).
     catch(next);
   };
 
@@ -449,16 +454,16 @@ module.exports = require("body-parser");
 Object.defineProperty(exports, "__esModule", { value: true });var _slicedToArray = function () {function sliceIterator(arr, i) {var _arr = [];var _n = true;var _d = false;var _e = undefined;try {for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {_arr.push(_s.value);if (i && _arr.length === i) break;}} catch (err) {_d = true;_e = err;} finally {try {if (!_n && _i["return"]) _i["return"]();} finally {if (_d) throw _e;}}return _arr;}return function (arr, i) {if (Array.isArray(arr)) {return arr;} else if (Symbol.iterator in Object(arr)) {return sliceIterator(arr, i);} else {throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var _express = __webpack_require__(4);var _express2 = _interopRequireDefault(_express);
 var _models = __webpack_require__(5);
 var _util = __webpack_require__(7);
-var _error = __webpack_require__(3);
+var _error = __webpack_require__(2);
 var _CodeHighRouter = __webpack_require__(10);var _CodeHighRouter2 = _interopRequireDefault(_CodeHighRouter);
 var _auth = __webpack_require__(27);var _auth2 = _interopRequireDefault(_auth);
-var _solution = __webpack_require__(29);var _solution2 = _interopRequireDefault(_solution);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _objectWithoutProperties(obj, keys) {var target = {};for (var i in obj) {if (keys.indexOf(i) >= 0) continue;if (!Object.prototype.hasOwnProperty.call(obj, i)) continue;target[i] = obj[i];}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+var _solution = __webpack_require__(29);var _solution2 = _interopRequireDefault(_solution);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _objectWithoutProperties(obj, keys) {var target = {};for (var i in obj) {if (keys.indexOf(i) >= 0) continue;if (!Object.prototype.hasOwnProperty.call(obj, i)) continue;target[i] = obj[i];}return target;}
 
 var router = new _express2.default.Router();
 
 var processWhere = function processWhere(Model, where) {
   var definition = Model.schema.obj;
-  var $and = [];
+  var query = {};
   var keys = Object.keys(where);var _iteratorNormalCompletion = true;var _didIteratorError = false;var _iteratorError = undefined;try {
     for (var _iterator = keys[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {var key = _step.value;
       if (!definition[key]) continue;
@@ -467,16 +472,16 @@ var processWhere = function processWhere(Model, where) {
       switch (property.type) {
         case String:
           if (property.enum) {
-            $and.push(_defineProperty({}, key, value));
+            query[key] = value;
           } else {
-            $and.push(_defineProperty({}, key, new RegExp(value, 'i')));
+            query[key] = new RegExp(value, 'i');
           }
           break;
         default:
-          $and.push(_defineProperty({}, key, value));}
+          query[key] = value;}
 
     }} catch (err) {_didIteratorError = true;_iteratorError = err;} finally {try {if (!_iteratorNormalCompletion && _iterator.return) {_iterator.return();}} finally {if (_didIteratorError) {throw _iteratorError;}}}
-  return $and.length ? { $and: $and } : {};
+  return query;
 };
 
 var processPopulate = function processPopulate(populate) {
@@ -496,8 +501,14 @@ var getRequestOptions = function getRequestOptions(req) {var _req$query =
 
 
 
-  req.query,populate = _req$query.populate,_where = _objectWithoutProperties(_req$query, ['populate']);
+
+
+
+  req.query,_req$query$sort = _req$query.sort,sort = _req$query$sort === undefined ? null : _req$query$sort,_req$query$skip = _req$query.skip,skip = _req$query$skip === undefined ? null : _req$query$skip,_req$query$limit = _req$query.limit,limit = _req$query$limit === undefined ? null : _req$query$limit,_req$query$populate = _req$query.populate,populate = _req$query$populate === undefined ? null : _req$query$populate,_where = _objectWithoutProperties(_req$query, ['sort', 'skip', 'limit', 'populate']);
   return {
+    sort: sort,
+    skip: skip,
+    limit: limit,
     populate: processPopulate(populate),
     where: function where(Object) {return processWhere(Object, _where);} };
 
@@ -575,7 +586,7 @@ var _jsonwebtoken = __webpack_require__(17);var _jsonwebtoken2 = _interopRequire
 var _db = __webpack_require__(1);var _db2 = _interopRequireDefault(_db);
 var _environment = __webpack_require__(6);
 var _config = __webpack_require__(22);
-var _error = __webpack_require__(3);
+var _error = __webpack_require__(2);
 var _util = __webpack_require__(7);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
 
 Schema = _mongoose2.default.Schema;var
@@ -661,7 +672,7 @@ module.exports = require("fs");
 
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};var _slicedToArray = function () {function sliceIterator(arr, i) {var _arr = [];var _n = true;var _d = false;var _e = undefined;try {for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {_arr.push(_s.value);if (i && _arr.length === i) break;}} catch (err) {_d = true;_e = err;} finally {try {if (!_n && _i["return"]) _i["return"]();} finally {if (_d) throw _e;}}return _arr;}return function (arr, i) {if (Array.isArray(arr)) {return arr;} else if (Symbol.iterator in Object(arr)) {return sliceIterator(arr, i);} else {throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var _mongoose = __webpack_require__(0);var _mongoose2 = _interopRequireDefault(_mongoose);
-var _error = __webpack_require__(3);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _toConsumableArray(arr) {if (Array.isArray(arr)) {for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {arr2[i] = arr[i];}return arr2;} else {return Array.from(arr);}}var
+var _error = __webpack_require__(2);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _toConsumableArray(arr) {if (Array.isArray(arr)) {for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {arr2[i] = arr[i];}return arr2;} else {return Array.from(arr);}}var
 
 Schema = _mongoose2.default.Schema;var
 ObjectId = Schema.Types.ObjectId;
@@ -788,7 +799,7 @@ authorPlugin;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });var _error = __webpack_require__(3);
+Object.defineProperty(exports, "__esModule", { value: true });var _error = __webpack_require__(2);
 
 var codeHighPlugin = function codeHighPlugin(schema, options) {
   schema.statics.create = function (body) {
@@ -838,7 +849,7 @@ jwtSignOptions = jwtSignOptions;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _slicedToArray = function () {function sliceIterator(arr, i) {var _arr = [];var _n = true;var _d = false;var _e = undefined;try {for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {_arr.push(_s.value);if (i && _arr.length === i) break;}} catch (err) {_d = true;_e = err;} finally {try {if (!_n && _i["return"]) _i["return"]();} finally {if (_d) throw _e;}}return _arr;}return function (arr, i) {if (Array.isArray(arr)) {return arr;} else if (Symbol.iterator in Object(arr)) {return sliceIterator(arr, i);} else {throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var _mongoose = __webpack_require__(0);var _mongoose2 = _interopRequireDefault(_mongoose);
 var _db = __webpack_require__(1);var _db2 = _interopRequireDefault(_db);
-var _plugins = __webpack_require__(2);
+var _plugins = __webpack_require__(3);
 var _Topic = __webpack_require__(9);var _Topic2 = _interopRequireDefault(_Topic);
 var _Rating = __webpack_require__(8);var _Rating2 = _interopRequireDefault(_Rating);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
 
@@ -885,7 +896,7 @@ solutionSchema.methods.rate = function (stars, author) {
     solution.average_stars = average_stars;
     return solution.force().save();
   }).
-  then(function () {return Solution.find({ topic: topic }).sort({ average_stars: -1 }).limit(10);}).
+  then(function () {return Solution.find({ topic: topic }).sort({ average_stars: -1 }).limit(5);}).
   then(function (top_solutions) {return _Topic2.default.findByIdAndUpdate(topic, { $set: { top_solutions: top_solutions } });}).
   then(function () {return solution;});
 };
@@ -930,7 +941,7 @@ testcaseSchema;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _mongoose = __webpack_require__(0);var _mongoose2 = _interopRequireDefault(_mongoose);
 var _db = __webpack_require__(1);var _db2 = _interopRequireDefault(_db);
-var _plugins = __webpack_require__(2);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
+var _plugins = __webpack_require__(3);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
 
 Schema = _mongoose2.default.Schema;
 
@@ -1070,10 +1081,56 @@ Object.defineProperty(exports, "__esModule", { value: true });var _socket = __we
 var _models = __webpack_require__(5);
 var _randomstring = __webpack_require__(32);var _randomstring2 = _interopRequireDefault(_randomstring);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
+var MIN_PLAYERS = 2;
+var MAX_PLAYERS = 8;
+var COUNTDOWN = 10;
 var io = (0, _socket2.default)();
 var games = [];
 io.on('connection', function (socket) {
-  var socketUser = null;
+  var author = null;
+  var game = null;
+  var player = null;
+  var timer = null;
+
+  var startGame = function startGame() {
+    if (!game.started_at) {
+      game.started_at = new Date();
+      _models.Topic.count().
+      then(function (count) {
+        var random = Math.floor(Math.random() * count);
+        return _models.Topic.findOne().skip(random);
+      }).
+      then(function (topic) {
+        game.topic = topic.toJSON({ req: {} });
+        updateGame();
+      }).
+      catch(console.error);
+    }
+  };
+
+  var updateGame = function updateGame() {
+    game.updated_at = new Date();
+    io.to(game.room).emit('GAME_UPDATED', game);
+  };
+
+  var updatePlayer = function updatePlayer(player) {
+    game.updated_at = new Date();
+    io.to(game.room).emit('PLAYER_UPDATED', player);
+  };
+
+  var finishGame = function finishGame() {
+    if (game.started_at && !game.finished_at) {
+      game.finished_at = new Date();
+      updateGame();
+    }
+  };
+
+  var removeGame = function removeGame() {
+    clearInterval(timer);
+    io.to(game.room).emit('GAME_REMOVED');
+    var index = games.indexOf(game);
+    if (~index) games.splice(index, 1);
+  };
 
   socket.on('AUTH', function (data) {var
     token = data.token;
@@ -1081,9 +1138,62 @@ io.on('connection', function (socket) {
     then(function (auth) {return _models.Auth.populate(auth, 'user');}).
     then(function (auth) {return auth.refresh();}).
     then(function (auth) {
-      socketUser = auth.user;var _auth$user =
-      auth.user,fb_user_id = _auth$user.fb_user_id,name = _auth$user.name;
-      assignPlayer({ fb_user_id: fb_user_id, name: name });
+      author = auth.user;
+      game = games.find(function (game) {return game.started_at && !game.finished_at && game.players.some(function (player) {return author.fb_user_id === player.user.fb_user_id;});});
+      if (!game) {
+        game = games.find(function (game) {return !game.started_at;});
+      }
+      if (!game) {
+        timer = setInterval(function () {
+          var now = new Date();
+          if (game.topic) {
+            if (game.started_at && now - game.started_at >= game.topic.time * 1000) {
+              finishGame();
+            }
+            if (game.finished_at && now - game.finished_at >= game.topic.time * game.players.length * 1000) {
+              removeGame();
+            }
+          } else {
+            if (game.countdown_at && now - game.countdown_at >= COUNTDOWN * 1000) {
+              startGame();
+            }
+          }
+        }, 100);
+
+        game = {
+          room: _randomstring2.default.generate(),
+          countdown_at: null,
+          started_at: null,
+          updated_at: null,
+          finished_at: null,
+          players: [],
+          topic: null };
+
+        games.push(game);
+      }
+      socket.join(game.room);
+
+      player = game.players.find(function (player) {return author.fb_user_id === player.user.fb_user_id;});
+      if (!player) {
+        player = {
+          user: author.toJSON({ req: {} }),
+          submitted_at: null,
+          given_up_at: null,
+          typing: false,
+          ratings: {},
+          solution: null };
+
+        game.players.push(player);
+        game.countdown_at = game.players.length >= MIN_PLAYERS ? new Date() : null;
+      }
+
+      if (game.started_at || game.players.length < MAX_PLAYERS) {
+        updateGame();
+      } else {
+        startGame();
+      }
+
+      addListeners();
     }).
     catch(function (err) {
       console.error(err);
@@ -1091,73 +1201,26 @@ io.on('connection', function (socket) {
     });
   });
 
-  var assignPlayer = function assignPlayer(user) {
-    var game = games.find(function (game) {return game.players.some(function (player) {return !game.finished_at && user.fb_user_id === player.user.fb_user_id;});});
-    if (!game) {
-      game = games.find(function (game) {return !game.started_at;});
-    }
-    if (!game) {
-      game = {
-        room: _randomstring2.default.generate(),
-        started_at: null,
-        updated_at: null,
-        finished_at: null,
-        players: [],
-        topic: null };
+  var isEveryoneSubmitted = function isEveryoneSubmitted() {return game.players.every(function (player) {return player.submitted_at || player.given_up_at;});};
 
-      games.push(game);
-    }
-    socket.join(game.room);
-
-    var player = game.players.find(function (player) {return user.fb_user_id === player.user.fb_user_id;});
-    if (!player) {
-      player = {
-        user: user,
-        submitted_at: null,
-        given_up_at: null,
-        typing: false,
-        ratings: {},
-        solution: null };
-
-      game.players.push(player);
-    }
-
-    if (game.started_at || game.players.length < 2) {
-      updateGame(game);
-    } else {
-      game.started_at = new Date();
-      _models.Topic.count().
-      then(function (count) {
-        var random = Math.random() * count | 0;
-        return _models.Topic.findOne().skip(random);
-      }).
-      then(function (topic) {
-        game.topic = topic.toJSON({ req: {} });
-        updateGame(game);
-        setTimeout(function () {
-          updateGame(game);
-        }, game.topic.time * 1000);
-      }).
-      catch(console.error);
-    }
-
+  var addListeners = function addListeners() {
     socket.on('disconnect', function () {
       if (!game.started_at) {
         var index = game.players.indexOf(player);
         if (~index) {
           game.players.splice(index, 1);
-          updateGame(game);
+          game.countdown_at = game.players.length >= MIN_PLAYERS ? new Date() : null;
+          updateGame();
         }
       }
     });
-
     socket.on('START_TYPING', function () {
       player.typing = true;
-      updateGame(game);
+      updatePlayer(player);
     });
     socket.on('STOP_TYPING', function () {
       player.typing = false;
-      updateGame(game);
+      updatePlayer(player);
     });
     socket.on('SUBMIT', function (code) {
       player.submitted_at = new Date();
@@ -1165,45 +1228,32 @@ io.on('connection', function (socket) {
         topic: game.topic,
         time: (player.submitted_at - game.started_at) / 1000,
         code: code }).
-      setAuthor(socketUser).save().
+      setAuthor(author).save().
       then(function (solution) {
         player.solution = solution.toJSON({ req: {} });
-        updateGame(game);
+        if (isEveryoneSubmitted()) return finishGame();
+        updatePlayer(player);
       }).
       catch(console.error);
     });
     socket.on('GIVE_UP', function () {
       player.given_up_at = new Date();
-      updateGame(game);
+      if (isEveryoneSubmitted()) return finishGame();
+      updatePlayer(player);
     });
     socket.on('RATE', function (data) {var
       solution_id = data.solution_id,stars = data.stars;
       _models.Solution.get(solution_id).
-      then(function (solution) {return solution.rate(stars, socketUser);}).
+      then(function (solution) {return solution.rate(stars, author);}).
       then(function (solution) {
         var ratedPlayer = game.players.find(function (player) {return solution._id.equals(player.solution && player.solution._id);});
         ratedPlayer.average_stars = solution.average_stars;
         ratedPlayer.ratings[player.user.fb_user_id] = stars;
         game.players = game.players.sort(function (p1, p2) {return (p2.average_stars || 0) - (p1.average_stars || 0);});
-        updateGame(game);
+        updateGame();
       }).
       catch(console.error);
     });
-  };
-
-  var updateGame = function updateGame(game) {
-    game.updated_at = new Date();
-    var all_submitted = game.players.every(function (player) {return player.submitted_at || player.given_up_at;});
-    var time_done = game.topic && (game.updated_at - game.started_at) / 1000 > game.topic.time;
-    if (!game.finished_at && (all_submitted || time_done)) {
-      game.finished_at = game.updated_at;
-      setTimeout(function () {
-        io.to(game.room).emit('GAME_REMOVED');
-        var index = games.indexOf(game);
-        if (~index) games.splice(index, 1);
-      }, game.topic ? game.topic.time * game.players.length * 1000 : 0);
-    }
-    io.to(game.room).emit('GAME_UPDATED', game);
   };
 });exports.default =
 

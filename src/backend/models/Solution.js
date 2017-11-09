@@ -47,7 +47,7 @@ solutionSchema.methods.rate = function (stars, author) {
       solution.average_stars = average_stars;
       return solution.force().save();
     })
-    .then(() => Solution.find({ topic }).sort({ average_stars: -1 }).limit(10))
+    .then(() => Solution.find({ topic }).sort({ average_stars: -1 }).limit(5))
     .then(top_solutions => Topic.findByIdAndUpdate(topic, { $set: { top_solutions } }))
     .then(() => solution);
 };

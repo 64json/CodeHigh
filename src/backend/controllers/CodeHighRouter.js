@@ -1,18 +1,23 @@
 import express from 'express';
+import { NotFoundError } from '/common/error';
 
 const create = (Model, singular, plural, paramReplacer = (req, res, next) => next()) => {
   const router = express.Router();
 
   const allObjects = (req, res, next) => {
-    Model.find(req.options.where(Model)).populate(req.options.populate)
+    const { where, sort, skip, limit, populate } = req.options;
+    Model.find(where(Model)).sort(sort).skip(skip).limit(limit).populate(populate)
       .then(objects => res.return({ [plural]: objects }))
       .catch(next);
   };
 
   const getObject = (req, res, next) => {
     const { object_id } = req.params;
-    Model.get(object_id)
-      .then(object => res.return({ [singular]: object }))
+    Model.findById(object_id).populate(req.options.populate)
+      .then(object => {
+        if (!object) throw new NotFoundError();
+        return res.return({ [singular]: object });
+      })
       .catch(next);
   };
 

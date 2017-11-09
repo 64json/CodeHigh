@@ -12,6 +12,8 @@ import 'brace/theme/monokai';
 import { Rating } from '/components';
 import { RatingApi, SolutionApi } from '../../apis/index';
 
+const limit = 5;
+
 @withRouter
 @connect(
   ({ env }) => ({
@@ -31,7 +33,12 @@ class HomeView extends React.Component {
 
   componentDidMount() {
     TopicApi.allTopics({ populate: 'author,top_solutions.author' })
-      .then(({ topics }) => this.setState({ topics }))
+      .then(({ topics }) => {
+        for (const topic of topics) {
+          topic.no_more = topic.top_solutions.length < limit;
+        }
+        this.setState({ topics })
+      })
       .catch(console.error);
   }
 
@@ -50,24 +57,38 @@ class HomeView extends React.Component {
     }
   }
 
-  rate(solution, stars) {
+  updateTopic(topic_id, change) {
+    const topics = JSON.parse(JSON.stringify(this.state.topics));
+    const topic = topics.find(topic => topic._id === topic_id);
+    Object.assign(topic, change);
+    this.setState({ topics });
+  }
+
+  rate(topic, solution, stars) {
     SolutionApi.rateSolution(solution._id, { stars })
-      .then(({ solution }) => {
-        const rating = { ...this.state.rating };
-        if (rating.solution === solution._id) {
-          rating.stars = stars;
-          this.setState({ rating });
-        }
-        const topics = JSON.parse(JSON.stringify(this.state.topics));
-        for (let i = 0; i < topics.length; i++) {
-          for (let j = 0; j < topics[i].top_solutions.length; j++) {
-            if (topics[i].top_solutions[j]._id === solution._id) {
-              topics[i].top_solutions[j].average_stars = solution.average_stars;
-            }
-          }
-        }
-        this.setState({ topics });
-      })
+      .then(() => SolutionApi.allSolutions({
+        topic: topic._id,
+        sort: '-average_stars',
+        limit: topic.top_solutions.length,
+        populate: 'author',
+      }))
+      .then(({ top_solutions }) => this.updateTopic(topic._id, { top_solutions }))
+      .catch(console.error);
+  }
+
+  loadMore(topic) {
+    this.updateTopic(topic._id, { no_more: true });
+    SolutionApi.allSolutions({
+      topic: topic._id,
+      sort: '-average_stars',
+      skip: topic.top_solutions.length,
+      limit,
+      populate: 'author',
+    })
+      .then(({ solutions }) => this.updateTopic(topic._id, {
+        top_solutions: [...topic.top_solutions, ...solutions],
+        no_more: solutions.length < limit,
+      }))
       .catch(console.error);
   }
 
@@ -133,10 +154,11 @@ class HomeView extends React.Component {
                   </div>
                   {
                     topic.top_solutions.map((solution, i) => {
+                      const is_opened = solution._id === opened;
                       return (
-                        <div className={styles.row} key={i}>
+                        <div className={classes(styles.row, is_opened && styles.opened)} key={i}>
                           <div onClick={() => this.open(solution)}
-                               className={classes(styles.player)}>
+                               className={styles.player}>
                             <div className={styles.picture}
                                  style={{ backgroundImage: `url(http://graph.facebook.com/${solution.author.fb_user_id}/picture?type=square)` }} />
                             <div className={styles.name}>
@@ -151,7 +173,7 @@ class HomeView extends React.Component {
                             }
                           </div>
                           {
-                            solution._id === opened &&
+                            is_opened &&
                             <AceEditor
                               className={styles.editor}
                               value={solution.code}
@@ -161,12 +183,12 @@ class HomeView extends React.Component {
                               readOnly={true} />
                           }
                           {
-                            solution._id === opened && author &&
+                            is_opened && author &&
                             <Rating stars={rating ? rating.stars : 0}
-                                    rate={stars => this.rate(solution, stars)} />
+                                    rate={stars => this.rate(topic, solution, stars)} />
                           }
                           {
-                            solution._id === opened &&
+                            is_opened &&
                             <Comments href={`http://codehigh.net/${topic._id}/${solution._id}`}
                                       colorScheme='dark'
                                       className={styles.comment} />
@@ -174,6 +196,12 @@ class HomeView extends React.Component {
                         </div>
                       );
                     })
+                  }
+                  {
+                    !topic.no_more &&
+                    <div className={styles.load_more} onClick={() => this.loadMore(topic)}>
+                      <span>Load More</span>
+                    </div>
                   }
                 </div>
               )

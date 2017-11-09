@@ -10,7 +10,7 @@ const router = new express.Router();
 
 const processWhere = (Model, where) => {
   const definition = Model.schema.obj;
-  const $and = [];
+  const query = {};
   const keys = Object.keys(where);
   for (const key of keys) {
     if (!definition[key]) continue;
@@ -19,16 +19,16 @@ const processWhere = (Model, where) => {
     switch (property.type) {
       case String:
         if (property.enum) {
-          $and.push({ [key]: value });
+          query[key] = value;
         } else {
-          $and.push({ [key]: new RegExp(value, 'i') });
+          query[key] = new RegExp(value, 'i');
         }
         break;
       default:
-        $and.push({ [key]: value });
+        query[key] = value;
     }
   }
-  return $and.length ? { $and } : {};
+  return query;
 };
 
 const processPopulate = populate => {
@@ -46,10 +46,16 @@ const processPopulate = populate => {
 
 const getRequestOptions = (req) => {
   const {
-    populate,
+    sort = null,
+    skip = null,
+    limit = null,
+    populate = null,
     ...where,
   } = req.query;
   return {
+    sort,
+    skip,
+    limit,
     populate: processPopulate(populate),
     where: Object => processWhere(Object, where)
   };
