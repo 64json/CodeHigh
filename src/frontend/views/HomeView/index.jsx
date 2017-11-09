@@ -72,7 +72,7 @@ class HomeView extends React.Component {
         limit: topic.top_solutions.length,
         populate: 'author',
       }))
-      .then(({ top_solutions }) => this.updateTopic(topic._id, { top_solutions }))
+      .then(({ solutions }) => this.updateTopic(topic._id, { top_solutions: solutions }))
       .catch(console.error);
   }
 
@@ -181,6 +181,7 @@ class HomeView extends React.Component {
                             is_opened &&
                             <Comments href={`http://codehigh.net/${topic._id}/${solution._id}`}
                                       colorScheme='dark'
+                                      width='400px'
                                       className={styles.comment} />
                           }
                         </div>
