@@ -10,6 +10,7 @@ import { classes, nn } from '/common/util';
 import chai from 'chai';
 import randomstring from 'randomstring';
 import { TopicApi } from '../../apis/index';
+import { Player } from '/components';
 
 @withRouter
 @connect(
@@ -220,14 +221,7 @@ class TopicView extends React.Component {
           <span>5. Click 'Save' button.</span>
         </div>
         <div className={styles.ide_panel}>
-          <div
-            className={classes(styles.player)}>
-            <div className={styles.picture}
-                 style={{ backgroundImage: `url(http://graph.facebook.com/${author.fb_user_id}/picture?type=square)` }} />
-            <div className={styles.name}>
-              {author.name}
-            </div>
-          </div>
+          <Player className={styles.player} player={{ user: author }} />
           <AceEditor
             className={styles.editor}
             value={code || ''}

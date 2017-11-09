@@ -1,0 +1,57 @@
+@import "~/common/stylesheet/index";
+
+.player {
+  display: flex;
+  align-items: center;
+  height: $height-header;
+  color: $theme-light;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  background-color: $theme-normal;
+
+  &:hover {
+    position: relative;
+    z-index: 999;
+    box-shadow: 0 0 12px rgba(0, 0, 0, .6);
+  }
+
+  .picture {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 2rem;
+    background-size: cover;
+    margin-right: .4rem;
+  }
+
+  .name {
+    flex: 1;
+  }
+
+  .typing {
+    height: 1.6rem;
+  }
+
+  .rating {
+    display: flex;
+    align-items: center;
+
+    .symbol {
+      margin-top: .05rem;
+      margin-right: .2rem;
+    }
+
+    .number {
+      font-size: 1.2rem;
+    }
+  }
+
+  &.given_up {
+    background-color: $theme-red !important;
+    color: $theme-lighter;
+  }
+
+  &.submitted {
+    background-color: $theme-green !important;
+    color: $theme-lighter;
+  }
+}

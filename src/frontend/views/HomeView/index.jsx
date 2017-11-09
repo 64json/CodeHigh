@@ -9,7 +9,7 @@ import AceEditor from 'react-ace';
 import 'brace';
 import 'brace/mode/javascript';
 import 'brace/theme/monokai';
-import { Rating } from '/components';
+import { Player, Rating } from '/components';
 import { RatingApi, SolutionApi } from '../../apis/index';
 
 const limit = 5;
@@ -123,15 +123,15 @@ class HomeView extends React.Component {
           }
         </div>
         <div className={styles.topics}>
-          <div className={styles.section}>
+          <div className={styles.label}>
             <span>Topics</span>
           </div>
           {
             topics.map(topic => {
               return (
-                <div className={styles.topic} key={topic._id}>
-                  <div className={styles.title_row}>
-                    <div className={styles.player}>
+                <div className={styles.section} key={topic._id}>
+                  <div className={styles.topic}>
+                    <div className={styles.title_bar}>
                       {
                         author && author._id === topic.author._id ?
                           <Link to={`/topic/${topic._id}`} className={classes(styles.title, styles.owned)}>
@@ -157,21 +157,11 @@ class HomeView extends React.Component {
                       const is_opened = solution._id === opened;
                       return (
                         <div className={classes(styles.row, is_opened && styles.opened)} key={i}>
-                          <div onClick={() => this.open(solution)}
-                               className={styles.player}>
-                            <div className={styles.picture}
-                                 style={{ backgroundImage: `url(http://graph.facebook.com/${solution.author.fb_user_id}/picture?type=square)` }} />
-                            <div className={styles.name}>
-                              {solution.author.name}
-                            </div>
-                            {
-                              <div className={styles.rating}>
-                                <span className={styles.symbol}>⭐</span>
-                                <span
-                                  className={styles.number}>️{solution.average_stars ? solution.average_stars.toFixed(1) : 0}</span>
-                              </div>
-                            }
-                          </div>
+                          <Player className={styles.player} onClick={() => this.open(solution)}
+                                  player={{
+                                    user: solution.author,
+                                    average_stars: solution.average_stars,
+                                  }} />
                           {
                             is_opened &&
                             <AceEditor

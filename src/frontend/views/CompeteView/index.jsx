@@ -12,7 +12,7 @@ import Cookies from 'js-cookie/src/js.cookie';
 import Highlight from 'react-highlight';
 import 'highlight.js/styles/monokai.css';
 import chai from 'chai';
-import { Rating } from '/components';
+import { Player, Rating } from '/components';
 
 let socket = null;
 
@@ -213,45 +213,13 @@ class CompeteView extends React.Component {
             <span>Players</span>
           </div>
           {
-            players.map(player => {
-              return (
-                <div onClick={() => done && this.select(player)}
-                     className={classes(styles.player, player.given_up_at && styles.given_up, player.submitted_at && styles.submitted)}
-                     key={player.user.fb_user_id}>
-                  <div className={styles.picture}
-                       style={{ backgroundImage: `url(http://graph.facebook.com/${player.user.fb_user_id}/picture?type=square)` }} />
-                  <div className={styles.name}>
-                    {player.user.name}
-                  </div>
-                  {
-                    player.typing &&
-                    <img src="/img/typing.svg" className={styles.typing} />
-                  }
-                  {
-                    Object.keys(player.ratings).length > 0 &&
-                    <div className={styles.rating}>
-                      <span className={styles.symbol}>⭐</span>
-                      <span className={styles.number}>️{player.average_stars.toFixed(1)}</span>
-                    </div>
-                  }
-                </div>
-              );
-            })
+            players.map(player => (
+              <Player key={player.user.fb_user_id} onClick={() => done && this.select(player)} player={player} />
+            ))
           }
         </div>
         <div className={styles.ide_panel}>
-          <div
-            className={classes(styles.player, player.given_up_at && styles.given_up, player.submitted_at && styles.submitted)}>
-            <div className={styles.picture}
-                 style={{ backgroundImage: `url(http://graph.facebook.com/${player.user.fb_user_id}/picture?type=square)` }} />
-            <div className={styles.name}>
-              {player.user.name}
-            </div>
-            {
-              player.typing &&
-              <img src="/img/typing.svg" className={styles.typing} />
-            }
-          </div>
+          <Player className={styles.player} player={player} />
           <AceEditor
             className={styles.editor}
             value={(done ? player.solution && player.solution.code : code) || ''}

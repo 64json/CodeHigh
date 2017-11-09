@@ -49,7 +49,7 @@
     padding: 4rem;
     flex-wrap: wrap;
 
-    .section {
+    .label {
       flex-basis: 100%;
       display: flex;
       justify-content: center;
@@ -57,18 +57,18 @@
       font-size: 2rem;
     }
 
-    .topic {
+    .section {
       flex-basis: 50%;
-      padding: 4rem;
+      padding: 2rem 4rem;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
 
-      .title_row {
+      .topic {
         background-color: $theme-dark;
         padding: 0 1.5rem;
 
-        .player {
+        .title_bar {
           display: flex;
           align-items: center;
           height: $height-header;
@@ -127,44 +127,7 @@
         }
 
         .player {
-          display: flex;
-          align-items: center;
-          height: $height-header;
-          color: $theme-light;
-          padding: 0 1rem;
-          box-sizing: border-box;
-
-          &:hover {
-            position: relative;
-            z-index: 999;
-            box-shadow: 0 0 12px rgba(0, 0, 0, .6);
-          }
-
-          .picture {
-            width: 2rem;
-            height: 2rem;
-            border-radius: 2rem;
-            background-size: cover;
-            margin-right: .4rem;
-          }
-
-          .name {
-            flex: 1;
-          }
-
-          .rating {
-            display: flex;
-            align-items: center;
-
-            .symbol {
-              margin-top: .05rem;
-              margin-right: .2rem;
-            }
-
-            .number {
-              font-size: 1.2rem;
-            }
-          }
+          background: none;
         }
 
         .editor {
