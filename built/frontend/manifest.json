@@ -3,9 +3,9 @@
   "short_name": "CodeHigh",
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#FF0000",
-  "background_color": "#FF0000",
-  "description": "the official website of CodeHigh",
+  "theme_color": "#382a1f",
+  "background_color": "#382a1f",
+  "description": "CodeHigh is a platform for coders to compete real-time. After 4 to 8 players join, a random algorithm problem is given. Each player writes his/her own solution within 3 minutes. Once everyone submits (or gives up), they vote for the most creative solution. CodeHigh lets users learn from others while having fun.",
   "icons": [
     {
       "src": "img/touch/homescreen48.png",
