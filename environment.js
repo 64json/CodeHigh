@@ -6,8 +6,7 @@ const {
 
   HTTP_PORT = '8080',
   HTTPS_PORT = '8443',
-  DEV_PROXY_PORT = '3000',
-  SOCKET_PORT = '8183',
+  PROXY_PORT = '3000',
 
   CREDENTIALS_ENABLED = '0',
   CREDENTIALS_PATH,
@@ -29,8 +28,7 @@ const __DEV__ = !__PROD__;
 
 const httpPort = parseInt(HTTP_PORT);
 const httpsPort = parseInt(HTTPS_PORT);
-const devProxyPort = __DEV__ && parseInt(DEV_PROXY_PORT);
-const socketPort = parseInt(SOCKET_PORT);
+const proxyPort = parseInt(PROXY_PORT);
 
 const read = (file) => fs.readFileSync(path.resolve(CREDENTIALS_PATH, file));
 const credentials = isEnabled(CREDENTIALS_ENABLED) && {
@@ -61,8 +59,7 @@ module.exports = {
   __DEV__,
   httpPort,
   httpsPort,
-  devProxyPort,
-  socketPort,
+  proxyPort,
   credentials,
   mongoUri,
   jwtSecret,

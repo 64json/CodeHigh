@@ -1,16 +1,14 @@
+const proxy = require('http-proxy-middleware');
 const {
   __PROD__,
   __DEV__,
-  devProxyPort,
-  socketPort,
+  proxyPort,
   backendBuiltPath,
   endpoint
 } = require('../environment');
 
 if (__DEV__) {
-  const express = require('express');
   const webpack = require('webpack');
-  const proxy = require('http-proxy-middleware');
 
   const webpackConfig = require('../webpack.backend.config.js');
 
@@ -18,7 +16,6 @@ if (__DEV__) {
 
   let lastHash = null;
   let httpServer = null;
-  let socketServer = null;
   compiler.watch({}, (err, stats) => {
     if (err) {
       lastHash = null;
@@ -34,26 +31,21 @@ if (__DEV__) {
 
       try {
         if (httpServer) httpServer.close();
-        if (socketServer) socketServer.close();
-        const backendApp = express();
-        const keys = Object.keys(require.cache).filter(key => key.startsWith(backendBuiltPath));
-        keys.forEach(key => delete require.cache[key]);
-        const app = require(backendBuiltPath).default;
-        backendApp.use(app);
-        httpServer = backendApp.listen(devProxyPort);
-        socketServer = app.io.listen(socketPort);
+        delete require.cache[require.resolve(backendBuiltPath)];
+        httpServer = require(backendBuiltPath).default;
+        httpServer.listen(proxyPort);
       } catch (e) {
         console.error(e);
       }
     }
   });
-
-  module.exports = proxy({
-    target: `http://localhost:${devProxyPort}/`,
-    pathRewrite: { ['^' + endpoint]: '' }
-  });
 } else {
-  const app = require(backendBuiltPath).default;
-  app.io.listen(socketPort);
-  module.exports = app;
+  const httpServer = require(backendBuiltPath).default;
+  httpServer.listen(proxyPort);
 }
+
+module.exports = proxy({
+  target: `http://localhost:${proxyPort}/`,
+  pathRewrite: { ['^' + endpoint]: '' },
+  ws: true,
+});

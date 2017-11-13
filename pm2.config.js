@@ -2,7 +2,7 @@ const env = {
   NODE_ENV: 'production',
   HTTP_PORT: '80',
   HTTPS_PORT: '443',
-  DEV_PROXY_PORT: '3000',
+  PROXY_PORT: '3000',
   CREDENTIALS_ENABLED: '0',
   //CREDENTIALS_PATH: '',
   //CREDENTIALS_CA: '',

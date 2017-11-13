@@ -49,8 +49,7 @@ class CompeteView extends React.Component {
     if (author) {
       this.setState({ selected_fb_user_id: author.fb_user_id });
 
-      const url = `http://${window.location.hostname}:8183`;
-      socket = socketIOClient(url);
+      socket = socketIOClient(`http://${window.location.host}`, { path: '/api/socket' });
       const token = Cookies.get('token');
       socket.emit('AUTH', { token });
       socket.on('GAME_UPDATED', game => {

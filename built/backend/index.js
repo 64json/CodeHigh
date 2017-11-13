@@ -122,7 +122,7 @@ AuthorizationError = AuthorizationError;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });var _authorPlugin = __webpack_require__(20);Object.defineProperty(exports, 'authorPlugin', { enumerable: true, get: function get() {return _interopRequireDefault(_authorPlugin).default;} });var _codeHighPlugin = __webpack_require__(21);Object.defineProperty(exports, 'codeHighPlugin', { enumerable: true, get: function get() {return _interopRequireDefault(_codeHighPlugin).
+Object.defineProperty(exports, "__esModule", { value: true });var _authorPlugin = __webpack_require__(21);Object.defineProperty(exports, 'authorPlugin', { enumerable: true, get: function get() {return _interopRequireDefault(_authorPlugin).default;} });var _codeHighPlugin = __webpack_require__(22);Object.defineProperty(exports, 'codeHighPlugin', { enumerable: true, get: function get() {return _interopRequireDefault(_codeHighPlugin).
     default;} });function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 /***/ }),
@@ -136,26 +136,25 @@ module.exports = require("express");
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });var _Auth = __webpack_require__(16);Object.defineProperty(exports, 'Auth', { enumerable: true, get: function get() {return _interopRequireDefault(_Auth).default;} });var _Rating = __webpack_require__(8);Object.defineProperty(exports, 'Rating', { enumerable: true, get: function get() {return _interopRequireDefault(_Rating).
-    default;} });var _Solution = __webpack_require__(23);Object.defineProperty(exports, 'Solution', { enumerable: true, get: function get() {return _interopRequireDefault(_Solution).
+Object.defineProperty(exports, "__esModule", { value: true });var _Auth = __webpack_require__(17);Object.defineProperty(exports, 'Auth', { enumerable: true, get: function get() {return _interopRequireDefault(_Auth).default;} });var _Rating = __webpack_require__(8);Object.defineProperty(exports, 'Rating', { enumerable: true, get: function get() {return _interopRequireDefault(_Rating).
+    default;} });var _Solution = __webpack_require__(24);Object.defineProperty(exports, 'Solution', { enumerable: true, get: function get() {return _interopRequireDefault(_Solution).
     default;} });var _Topic = __webpack_require__(9);Object.defineProperty(exports, 'Topic', { enumerable: true, get: function get() {return _interopRequireDefault(_Topic).
-    default;} });var _User = __webpack_require__(26);Object.defineProperty(exports, 'User', { enumerable: true, get: function get() {return _interopRequireDefault(_User).
+    default;} });var _User = __webpack_require__(27);Object.defineProperty(exports, 'User', { enumerable: true, get: function get() {return _interopRequireDefault(_User).
     default;} });function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 /***/ }),
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(__dirname) {const path = __webpack_require__(18);
-const fs = __webpack_require__(19);
+/* WEBPACK VAR INJECTION */(function(__dirname) {const path = __webpack_require__(19);
+const fs = __webpack_require__(20);
 
 const {
   NODE_ENV = 'production',
 
   HTTP_PORT = '8080',
   HTTPS_PORT = '8443',
-  DEV_PROXY_PORT = '3000',
-  SOCKET_PORT = '8183',
+  PROXY_PORT = '3000',
 
   CREDENTIALS_ENABLED = '0',
   CREDENTIALS_PATH,
@@ -177,8 +176,7 @@ const __DEV__ = !__PROD__;
 
 const httpPort = parseInt(HTTP_PORT);
 const httpsPort = parseInt(HTTPS_PORT);
-const devProxyPort = __DEV__ && parseInt(DEV_PROXY_PORT);
-const socketPort = parseInt(SOCKET_PORT);
+const proxyPort = __DEV__ && parseInt(PROXY_PORT);
 
 const read = (file) => fs.readFileSync(path.resolve(CREDENTIALS_PATH, file));
 const credentials = isEnabled(CREDENTIALS_ENABLED) && {
@@ -209,8 +207,7 @@ module.exports = {
   __DEV__,
   httpPort,
   httpsPort,
-  devProxyPort,
-  socketPort,
+  proxyPort,
   credentials,
   mongoUri,
   jwtSecret,
@@ -297,7 +294,7 @@ Rating;
 Object.defineProperty(exports, "__esModule", { value: true });var _mongoose = __webpack_require__(0);var _mongoose2 = _interopRequireDefault(_mongoose);
 var _db = __webpack_require__(1);var _db2 = _interopRequireDefault(_db);
 var _plugins = __webpack_require__(3);
-var _nested = __webpack_require__(24);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
+var _nested = __webpack_require__(25);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
 
 Schema = _mongoose2.default.Schema;var
 ObjectId = Schema.Types.ObjectId;
@@ -409,13 +406,16 @@ create;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _express = __webpack_require__(4);var _express2 = _interopRequireDefault(_express);
 var _morgan = __webpack_require__(12);var _morgan2 = _interopRequireDefault(_morgan);
-var _cookieParser = __webpack_require__(13);var _cookieParser2 = _interopRequireDefault(_cookieParser);
-var _bodyParser = __webpack_require__(14);var _bodyParser2 = _interopRequireDefault(_bodyParser);
-var _controllers = __webpack_require__(15);var _controllers2 = _interopRequireDefault(_controllers);
+var _http = __webpack_require__(13);var _http2 = _interopRequireDefault(_http);
+var _cookieParser = __webpack_require__(14);var _cookieParser2 = _interopRequireDefault(_cookieParser);
+var _bodyParser = __webpack_require__(15);var _bodyParser2 = _interopRequireDefault(_bodyParser);
+var _controllers = __webpack_require__(16);var _controllers2 = _interopRequireDefault(_controllers);
 var _db = __webpack_require__(1);var _db2 = _interopRequireDefault(_db);
-var _io = __webpack_require__(30);var _io2 = _interopRequireDefault(_io);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _socket = __webpack_require__(31);var _socket2 = _interopRequireDefault(_socket);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 var app = (0, _express2.default)();
+var httpServer = _http2.default.Server(app);
+(0, _socket2.default)(httpServer);
 _db2.default.on('error', console.error);
 _db2.default.once('open', function () {
   app.use((0, _morgan2.default)('tiny'));
@@ -423,10 +423,9 @@ _db2.default.once('open', function () {
   app.use(_bodyParser2.default.json());
   app.use(_bodyParser2.default.urlencoded({ extended: true }));
   app.use(_controllers2.default);
-});
-app.io = _io2.default;exports.default =
+});exports.default =
 
-app;
+httpServer;
 
 /***/ }),
 /* 12 */
@@ -438,16 +437,22 @@ module.exports = require("morgan");
 /* 13 */
 /***/ (function(module, exports) {
 
-module.exports = require("cookie-parser");
+module.exports = require("http");
 
 /***/ }),
 /* 14 */
 /***/ (function(module, exports) {
 
-module.exports = require("body-parser");
+module.exports = require("cookie-parser");
 
 /***/ }),
 /* 15 */
+/***/ (function(module, exports) {
+
+module.exports = require("body-parser");
+
+/***/ }),
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -456,8 +461,8 @@ var _models = __webpack_require__(5);
 var _util = __webpack_require__(7);
 var _error = __webpack_require__(2);
 var _CodeHighRouter = __webpack_require__(10);var _CodeHighRouter2 = _interopRequireDefault(_CodeHighRouter);
-var _auth = __webpack_require__(27);var _auth2 = _interopRequireDefault(_auth);
-var _solution = __webpack_require__(29);var _solution2 = _interopRequireDefault(_solution);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _objectWithoutProperties(obj, keys) {var target = {};for (var i in obj) {if (keys.indexOf(i) >= 0) continue;if (!Object.prototype.hasOwnProperty.call(obj, i)) continue;target[i] = obj[i];}return target;}
+var _auth = __webpack_require__(28);var _auth2 = _interopRequireDefault(_auth);
+var _solution = __webpack_require__(30);var _solution2 = _interopRequireDefault(_solution);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _objectWithoutProperties(obj, keys) {var target = {};for (var i in obj) {if (keys.indexOf(i) >= 0) continue;if (!Object.prototype.hasOwnProperty.call(obj, i)) continue;target[i] = obj[i];}return target;}
 
 var router = new _express2.default.Router();
 
@@ -577,15 +582,15 @@ router.use(function (err, req, res, next) {
 router;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _mongoose = __webpack_require__(0);var _mongoose2 = _interopRequireDefault(_mongoose);
-var _jsonwebtoken = __webpack_require__(17);var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
+var _jsonwebtoken = __webpack_require__(18);var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
 var _db = __webpack_require__(1);var _db2 = _interopRequireDefault(_db);
 var _environment = __webpack_require__(6);
-var _config = __webpack_require__(22);
+var _config = __webpack_require__(23);
 var _error = __webpack_require__(2);
 var _util = __webpack_require__(7);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
 
@@ -649,25 +654,25 @@ var Auth = _db2.default.model('Auth', authSchema);exports.default =
 Auth;
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports) {
 
 module.exports = require("jsonwebtoken");
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports) {
 
 module.exports = require("path");
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -795,7 +800,7 @@ var authorPlugin = function authorPlugin(schema, options) {
 authorPlugin;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -831,7 +836,7 @@ var codeHighPlugin = function codeHighPlugin(schema, options) {
 codeHighPlugin;
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -843,7 +848,7 @@ Object.defineProperty(exports, "__esModule", { value: true });var jwtSignOptions
 jwtSignOptions = jwtSignOptions;
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -905,14 +910,14 @@ var Solution = _db2.default.model(modelName, solutionSchema);exports.default =
 Solution;
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });var _Testcase = __webpack_require__(25);Object.defineProperty(exports, 'Testcase', { enumerable: true, get: function get() {return _interopRequireDefault(_Testcase).default;} });function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+Object.defineProperty(exports, "__esModule", { value: true });var _Testcase = __webpack_require__(26);Object.defineProperty(exports, 'Testcase', { enumerable: true, get: function get() {return _interopRequireDefault(_Testcase).default;} });function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -935,7 +940,7 @@ testcaseSchema.options.toJSON = {
 testcaseSchema;
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -984,12 +989,12 @@ var User = _db2.default.model(modelName, userSchema);exports.default =
 User;
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });var _express = __webpack_require__(4);var _express2 = _interopRequireDefault(_express);
-var _fb = __webpack_require__(28);var _fb2 = _interopRequireDefault(_fb);
+var _fb = __webpack_require__(29);var _fb2 = _interopRequireDefault(_fb);
 var _models = __webpack_require__(5);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 var router = _express2.default.Router();
@@ -1043,13 +1048,13 @@ delete(destroyAuth);exports.default =
 router;
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports) {
 
 module.exports = require("fb");
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1073,200 +1078,202 @@ post(rateSolution);exports.default =
 router;
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });var _socket = __webpack_require__(31);var _socket2 = _interopRequireDefault(_socket);
+Object.defineProperty(exports, "__esModule", { value: true });var _socket = __webpack_require__(32);var _socket2 = _interopRequireDefault(_socket);
 var _models = __webpack_require__(5);
-var _randomstring = __webpack_require__(32);var _randomstring2 = _interopRequireDefault(_randomstring);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _randomstring = __webpack_require__(33);var _randomstring2 = _interopRequireDefault(_randomstring);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 var MIN_PLAYERS = 2;
 var MAX_PLAYERS = 8;
 var COUNTDOWN = 10;
-var io = (0, _socket2.default)();
-var games = [];
-io.on('connection', function (socket) {
-  var author = null;
-  var game = null;
-  var player = null;
-  var timer = null;
+var connectSocket = function connectSocket(httpServer) {
+  var io = (0, _socket2.default)(httpServer, { path: '/socket' });
+  var games = [];
+  io.on('connection', function (socket) {
+    var author = null;
+    var game = null;
+    var player = null;
+    var timer = null;
 
-  var startGame = function startGame() {
-    if (!game.started_at) {
-      game.started_at = new Date();
-      _models.Topic.count().
-      then(function (count) {
-        var random = Math.floor(Math.random() * count);
-        return _models.Topic.findOne().skip(random);
-      }).
-      then(function (topic) {
-        game.topic = topic.toJSON({ req: {} });
-        updateGame();
-      }).
-      catch(console.error);
-    }
-  };
-
-  var updateGame = function updateGame() {
-    game.updated_at = new Date();
-    io.to(game.room).emit('GAME_UPDATED', game);
-  };
-
-  var updatePlayer = function updatePlayer(player) {
-    game.updated_at = new Date();
-    io.to(game.room).emit('PLAYER_UPDATED', player);
-  };
-
-  var finishGame = function finishGame() {
-    if (game.started_at && !game.finished_at) {
-      game.finished_at = new Date();
-      updateGame();
-    }
-  };
-
-  var removeGame = function removeGame() {
-    clearInterval(timer);
-    io.to(game.room).emit('GAME_REMOVED');
-    var index = games.indexOf(game);
-    if (~index) games.splice(index, 1);
-  };
-
-  socket.on('AUTH', function (data) {var
-    token = data.token;
-    _models.Auth.verify(token).
-    then(function (auth) {return _models.Auth.populate(auth, 'user');}).
-    then(function (auth) {return auth.refresh();}).
-    then(function (auth) {
-      author = auth.user;
-      game = games.find(function (game) {return game.started_at && !game.finished_at && game.players.some(function (player) {return author.fb_user_id === player.user.fb_user_id;});});
-      if (!game) {
-        game = games.find(function (game) {return !game.started_at;});
-      }
-      if (!game) {
-        timer = setInterval(function () {
-          var now = new Date();
-          if (game.topic) {
-            if (game.started_at && now - game.started_at >= game.topic.time * 1000) {
-              finishGame();
-            }
-            if (game.finished_at && now - game.finished_at >= game.topic.time * game.players.length * 1000) {
-              removeGame();
-            }
-          } else {
-            if (game.countdown_at && now - game.countdown_at >= COUNTDOWN * 1000) {
-              startGame();
-            }
-          }
-        }, 100);
-
-        game = {
-          room: _randomstring2.default.generate(),
-          countdown_at: null,
-          started_at: null,
-          updated_at: null,
-          finished_at: null,
-          players: [],
-          topic: null };
-
-        games.push(game);
-      }
-      socket.join(game.room);
-
-      player = game.players.find(function (player) {return author.fb_user_id === player.user.fb_user_id;});
-      if (!player) {
-        player = {
-          user: author.toJSON({ req: {} }),
-          submitted_at: null,
-          given_up_at: null,
-          typing: false,
-          ratings: {},
-          solution: null };
-
-        game.players.push(player);
-        game.countdown_at = game.players.length >= MIN_PLAYERS ? new Date() : null;
-      }
-
-      if (game.started_at || game.players.length < MAX_PLAYERS) {
-        updateGame();
-      } else {
-        startGame();
-      }
-
-      addListeners();
-    }).
-    catch(function (err) {
-      console.error(err);
-      socket.disconnect();
-    });
-  });
-
-  var isEveryoneSubmitted = function isEveryoneSubmitted() {return game.players.every(function (player) {return player.submitted_at || player.given_up_at;});};
-
-  var addListeners = function addListeners() {
-    socket.on('disconnect', function () {
+    var startGame = function startGame() {
       if (!game.started_at) {
-        var index = game.players.indexOf(player);
-        if (~index) {
-          game.players.splice(index, 1);
-          game.countdown_at = game.players.length >= MIN_PLAYERS ? new Date() : null;
+        game.started_at = new Date();
+        _models.Topic.count().
+        then(function (count) {
+          var random = Math.floor(Math.random() * count);
+          return _models.Topic.findOne().skip(random);
+        }).
+        then(function (topic) {
+          game.topic = topic.toJSON({ req: {} });
           updateGame();
-        }
+        }).
+        catch(console.error);
       }
+    };
+
+    var updateGame = function updateGame() {
+      game.updated_at = new Date();
+      io.to(game.room).emit('GAME_UPDATED', game);
+    };
+
+    var updatePlayer = function updatePlayer(player) {
+      game.updated_at = new Date();
+      io.to(game.room).emit('PLAYER_UPDATED', player);
+    };
+
+    var finishGame = function finishGame() {
+      if (game.started_at && !game.finished_at) {
+        game.finished_at = new Date();
+        updateGame();
+      }
+    };
+
+    var removeGame = function removeGame() {
+      clearInterval(timer);
+      io.to(game.room).emit('GAME_REMOVED');
+      var index = games.indexOf(game);
+      if (~index) games.splice(index, 1);
+    };
+
+    socket.on('AUTH', function (data) {var
+      token = data.token;
+      _models.Auth.verify(token).
+      then(function (auth) {return _models.Auth.populate(auth, 'user');}).
+      then(function (auth) {return auth.refresh();}).
+      then(function (auth) {
+        author = auth.user;
+        game = games.find(function (game) {return game.started_at && !game.finished_at && game.players.some(function (player) {return author.fb_user_id === player.user.fb_user_id;});});
+        if (!game) {
+          game = games.find(function (game) {return !game.started_at;});
+        }
+        if (!game) {
+          timer = setInterval(function () {
+            var now = new Date();
+            if (game.topic) {
+              if (game.started_at && now - game.started_at >= game.topic.time * 1000) {
+                finishGame();
+              }
+              if (game.finished_at && now - game.finished_at >= game.topic.time * game.players.length * 1000) {
+                removeGame();
+              }
+            } else {
+              if (game.countdown_at && now - game.countdown_at >= COUNTDOWN * 1000) {
+                startGame();
+              }
+            }
+          }, 100);
+
+          game = {
+            room: _randomstring2.default.generate(),
+            countdown_at: null,
+            started_at: null,
+            updated_at: null,
+            finished_at: null,
+            players: [],
+            topic: null };
+
+          games.push(game);
+        }
+        socket.join(game.room);
+
+        player = game.players.find(function (player) {return author.fb_user_id === player.user.fb_user_id;});
+        if (!player) {
+          player = {
+            user: author.toJSON({ req: {} }),
+            submitted_at: null,
+            given_up_at: null,
+            typing: false,
+            ratings: {},
+            solution: null };
+
+          game.players.push(player);
+          game.countdown_at = game.players.length >= MIN_PLAYERS ? new Date() : null;
+        }
+
+        if (game.started_at || game.players.length < MAX_PLAYERS) {
+          updateGame();
+        } else {
+          startGame();
+        }
+
+        addListeners();
+      }).
+      catch(function (err) {
+        console.error(err);
+        socket.disconnect();
+      });
     });
-    socket.on('START_TYPING', function () {
-      player.typing = true;
-      updatePlayer(player);
-    });
-    socket.on('STOP_TYPING', function () {
-      player.typing = false;
-      updatePlayer(player);
-    });
-    socket.on('SUBMIT', function (code) {
-      player.submitted_at = new Date();
-      new _models.Solution({
-        topic: game.topic,
-        time: (player.submitted_at - game.started_at) / 1000,
-        code: code }).
-      setAuthor(author).save().
-      then(function (solution) {
-        player.solution = solution.toJSON({ req: {} });
+
+    var isEveryoneSubmitted = function isEveryoneSubmitted() {return game.players.every(function (player) {return player.submitted_at || player.given_up_at;});};
+
+    var addListeners = function addListeners() {
+      socket.on('disconnect', function () {
+        if (!game.started_at) {
+          var index = game.players.indexOf(player);
+          if (~index) {
+            game.players.splice(index, 1);
+            game.countdown_at = game.players.length >= MIN_PLAYERS ? new Date() : null;
+            updateGame();
+          }
+        }
+      });
+      socket.on('START_TYPING', function () {
+        player.typing = true;
+        updatePlayer(player);
+      });
+      socket.on('STOP_TYPING', function () {
+        player.typing = false;
+        updatePlayer(player);
+      });
+      socket.on('SUBMIT', function (code) {
+        player.submitted_at = new Date();
+        new _models.Solution({
+          topic: game.topic,
+          time: (player.submitted_at - game.started_at) / 1000,
+          code: code }).
+        setAuthor(author).save().
+        then(function (solution) {
+          player.solution = solution.toJSON({ req: {} });
+          if (isEveryoneSubmitted()) return finishGame();
+          updatePlayer(player);
+        }).
+        catch(console.error);
+      });
+      socket.on('GIVE_UP', function () {
+        player.given_up_at = new Date();
         if (isEveryoneSubmitted()) return finishGame();
         updatePlayer(player);
-      }).
-      catch(console.error);
-    });
-    socket.on('GIVE_UP', function () {
-      player.given_up_at = new Date();
-      if (isEveryoneSubmitted()) return finishGame();
-      updatePlayer(player);
-    });
-    socket.on('RATE', function (data) {var
-      solution_id = data.solution_id,stars = data.stars;
-      _models.Solution.get(solution_id).
-      then(function (solution) {return solution.rate(stars, author);}).
-      then(function (solution) {
-        var ratedPlayer = game.players.find(function (player) {return solution._id.equals(player.solution && player.solution._id);});
-        ratedPlayer.average_stars = solution.average_stars;
-        ratedPlayer.ratings[player.user.fb_user_id] = stars;
-        game.players = game.players.sort(function (p1, p2) {return (p2.average_stars || 0) - (p1.average_stars || 0);});
-        updateGame();
-      }).
-      catch(console.error);
-    });
-  };
-});exports.default =
+      });
+      socket.on('RATE', function (data) {var
+        solution_id = data.solution_id,stars = data.stars;
+        _models.Solution.get(solution_id).
+        then(function (solution) {return solution.rate(stars, author);}).
+        then(function (solution) {
+          var ratedPlayer = game.players.find(function (player) {return solution._id.equals(player.solution && player.solution._id);});
+          ratedPlayer.average_stars = solution.average_stars;
+          ratedPlayer.ratings[player.user.fb_user_id] = stars;
+          game.players = game.players.sort(function (p1, p2) {return (p2.average_stars || 0) - (p1.average_stars || 0);});
+          updateGame();
+        }).
+        catch(console.error);
+      });
+    };
+  });
+};exports.default =
 
-io;
+connectSocket;
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports) {
 
 module.exports = require("socket.io");
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports) {
 
 module.exports = require("randomstring");
