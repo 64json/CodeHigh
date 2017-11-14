@@ -84,6 +84,11 @@ const processRemove = (schema, options) => {
   const match = getMatch(options.remove);
   schema.pre('remove', function (next) {
     const doc = this;
+    if (doc._author === true) return next();
+    if (options.authorField) {
+      if (doc.isModified('author')) return next(new PermissionError());
+      doc.author = doc._author;
+    }
     try {
       check(match, doc.author, doc);
       next();

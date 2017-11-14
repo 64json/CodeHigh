@@ -780,6 +780,11 @@ var processRemove = function processRemove(schema, options) {
   var match = getMatch(options.remove);
   schema.pre('remove', function (next) {
     var doc = this;
+    if (doc._author === true) return next();
+    if (options.authorField) {
+      if (doc.isModified('author')) return next(new _error.PermissionError());
+      doc.author = doc._author;
+    }
     try {
       check(match, doc.author, doc);
       next();
