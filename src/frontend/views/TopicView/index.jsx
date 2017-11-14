@@ -10,7 +10,7 @@ import { classes, nn } from '/common/util';
 import chai from 'chai';
 import randomstring from 'randomstring';
 import { TopicApi } from '../../apis/index';
-import { Player } from '/components';
+import { Player, Testcases } from '/components';
 
 @withRouter
 @connect(
@@ -236,20 +236,7 @@ class TopicView extends React.Component {
           </div>
           {
             errors &&
-            <div className={styles.console}>
-              {
-                errors.map((error, i) => (
-                  <div className={styles.testcase} key={i}>
-                    <span className={styles.number}>Testcase #{i + 1}</span>
-                    {
-                      error === undefined ?
-                        <span className={styles.pass}>pass</span> :
-                        <span className={styles.fail}>{error.toString()}</span>
-                    }
-                  </div>
-                ))
-              }
-            </div>
+            <Testcases errors={errors} />
           }
         </div>
       </div>

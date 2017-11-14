@@ -12,7 +12,7 @@ import Cookies from 'js-cookie/src/js.cookie';
 import Highlight from 'react-highlight';
 import 'highlight.js/styles/monokai.css';
 import chai from 'chai';
-import { Player, Rating } from '/components';
+import { Player, Rating, Testcases } from '/components';
 
 let socket = null;
 
@@ -240,20 +240,7 @@ class CompeteView extends React.Component {
           }
           {
             !done && errors &&
-            <div className={styles.console}>
-              {
-                errors.map((error, i) => (
-                  <div className={styles.testcase} key={i}>
-                    <span className={styles.number}>Testcase #{i + 1}</span>
-                    {
-                      error === undefined ?
-                        <span className={styles.pass}>pass</span> :
-                        <span className={styles.fail}>{error.toString()}</span>
-                    }
-                  </div>
-                ))
-              }
-            </div>
+            <Testcases errors={errors} />
           }
           {
             !done && success &&

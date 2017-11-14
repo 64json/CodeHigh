@@ -233,41 +233,5 @@
         background-color: $theme-green;
       }
     }
-
-    .console {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      background-color: $theme-normal;
-      max-height: 18rem;
-      overflow-y: auto;
-
-      > * {
-        flex-shrink: 0;
-      }
-
-      .testcase {
-        height: $height-header;
-        display: flex;
-        align-items: center;
-        padding: 0 1rem;
-
-        .number {
-          color: $theme-light;
-          font-size: 1.2rem;
-          flex: 1;
-          white-space: nowrap;
-          margin-right: 1rem;
-        }
-
-        .pass {
-          color: green;
-        }
-
-        .fail {
-          color: red;
-        }
-      }
-    }
   }
 }
