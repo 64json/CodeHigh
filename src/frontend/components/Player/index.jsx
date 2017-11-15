@@ -23,7 +23,7 @@ class Player extends React.Component {
           player.average_stars &&
           <div className={styles.rating}>
             <span className={styles.symbol}>⭐</span>
-            <span className={styles.number}>️{player.average_stars.toFixed(1)}</span>
+            <span className={styles.number}>{player.average_stars.toFixed(1)}</span>
           </div>
         }
       </div>
